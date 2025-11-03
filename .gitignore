@@ -1,1 +1,8 @@
 .DS_Store
+
+# IDE Files
+.idea/
+
+# Gradle Build Files
+/build/
+.gradle/  # 👈 이 부분을 추가합니다.
