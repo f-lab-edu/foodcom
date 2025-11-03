@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
-@Table(name = "MEMBER")
+@Table(name = "member")
 @Data
 public class Member {
 
@@ -16,7 +16,7 @@ public class Member {
 
     private String password;
 
-    private String name;
+    private String username;
 
     @Enumerated(EnumType.STRING)
     private Gender gender;
@@ -24,5 +24,15 @@ public class Member {
     private Integer age;
 
     public Member() {
+    }
+
+    public static Member createMember(MemberJoinDTO memberJoinDTO) {
+        Member member = new Member();
+        member.setLoginId(memberJoinDTO.getLoginId());
+        member.setPassword(memberJoinDTO.getPassword());
+        member.setUsername(memberJoinDTO.getUsername());
+        member.setGender(memberJoinDTO.getGender());
+        member.setAge(memberJoinDTO.getAge());
+        return member;
     }
 }

@@ -11,7 +11,7 @@ public class MemberJoinDTO {
     @NotEmpty
     private String password;
     @NotEmpty
-    private String name;
+    private String username;
     @NotEmpty
     private Gender gender;
     @NotEmpty
