@@ -23,8 +23,10 @@ public class Member {
     private String username;
 
     @Enumerated(EnumType.STRING)
+    @NotNull
     private Gender gender;
 
+    @NotNull
     private Integer age;
 
     public Member() {
