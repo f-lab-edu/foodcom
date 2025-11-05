@@ -1,6 +1,7 @@
 package com.foodcom.firstpro.domain.member;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Entity
@@ -12,10 +13,13 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
     private String loginId;
 
+    @NotNull
     private String password;
 
+    @NotNull
     private String username;
 
     @Enumerated(EnumType.STRING)

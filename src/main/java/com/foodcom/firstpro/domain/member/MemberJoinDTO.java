@@ -1,19 +1,20 @@
 package com.foodcom.firstpro.domain.member;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
 @Data
 public class MemberJoinDTO {
 
-    @NotEmpty
+    @NotBlank
     private String loginId;
-    @NotEmpty
+    @NotBlank
     private String password;
-    @NotEmpty
+    @NotBlank
     private String username;
-    @NotEmpty
+    @NotBlank
     private Gender gender;
-    @NotEmpty
+    @NotBlank
     private Integer age;
 }
