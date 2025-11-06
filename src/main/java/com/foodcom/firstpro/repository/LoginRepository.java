@@ -8,7 +8,6 @@ import java.util.Optional;
 
 public interface LoginRepository extends JpaRepository<Member, Long> {
 
-    // 💡 로그인 ID 필드인 'loginId'를 사용
     Optional<Member> findByLoginId(String loginId);
 
     // 회원가입 시 중복 ID를 확인하는 메서드

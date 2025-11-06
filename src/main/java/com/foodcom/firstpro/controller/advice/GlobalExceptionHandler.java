@@ -37,6 +37,13 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse("중복 예외(아이디, 비번 등)", ex.getMessage()));
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentEx(IllegalArgumentException ex) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(new ErrorResponse("인증 실패", ex.getMessage()));
+    }
+
     @Data
     @AllArgsConstructor
     static class ErrorResponse {
