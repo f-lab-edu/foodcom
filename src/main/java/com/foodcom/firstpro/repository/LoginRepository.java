@@ -10,9 +10,4 @@ public interface LoginRepository extends JpaRepository<Member, Long> {
 
     Optional<Member> findByLoginId(String loginId);
 
-    // 회원가입 시 중복 ID를 확인하는 메서드
-    boolean existsByLoginId(String loginId);
-
-    // 비밀번호 중보도 확인
-    boolean existsByPassword(String password);
 }

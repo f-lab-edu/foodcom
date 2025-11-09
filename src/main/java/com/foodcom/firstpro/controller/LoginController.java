@@ -41,7 +41,7 @@ public class LoginController {
         Map<String, Long> responseBody = new HashMap<>();
         responseBody.put("id", id);
 
-        //201 Created 상태 코드와 Body, Location Header를 포함한 ResponseEntity 반환
+        //201 Created
         return ResponseEntity
                 .created(location)
                 .body(responseBody);

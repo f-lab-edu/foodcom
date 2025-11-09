@@ -2,6 +2,7 @@ package com.foodcom.firstpro.controller.advice;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -28,12 +29,12 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse("Validation Failed", errors));
     }
 
-    // 비즈니스 로직 예외 처리 예시 (ID 중복 등)
+
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ErrorResponse> handleIllegalState(IllegalStateException ex) {
-        // 409 Conflict 또는 400 Bad Request 상태 코드를 반환
+
         return ResponseEntity
-                .status(HttpStatus.CONFLICT) // 409
+                .status(HttpStatus.CONFLICT)
                 .body(new ErrorResponse("중복 예외(아이디, 비번 등)", ex.getMessage()));
     }
 
@@ -42,6 +43,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(new ErrorResponse("인증 실패", ex.getMessage()));
+    }
+
+    //추후에 성별이나 다른 회원 정보의 중복을 방지하고 싶을 경우 DataIntegrityViolationException를 상속한 커스텀 예외 생성하기
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse("중복되는 아이디입니다.", ex.getMessage()));
     }
 
     @Data
