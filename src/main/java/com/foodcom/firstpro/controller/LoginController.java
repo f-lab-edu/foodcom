@@ -1,8 +1,14 @@
 package com.foodcom.firstpro.controller;
 
+import com.foodcom.firstpro.auth.dto.AccessTokenResponse;
+import com.foodcom.firstpro.auth.dto.TokenInfo;
+import com.foodcom.firstpro.auth.service.AuthService;
+import com.foodcom.firstpro.auth.util.CookieUtil;
+import com.foodcom.firstpro.domain.member.LoginResponse;
 import com.foodcom.firstpro.domain.member.MemberJoinDTO;
 import com.foodcom.firstpro.domain.member.MemberLoginDTO;
 import com.foodcom.firstpro.service.LoginService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,8 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @RestController
@@ -22,10 +26,10 @@ import java.util.Map;
 public class LoginController {
 
     private final LoginService loginService;
-
+    private final AuthService authService;
 
     @PostMapping("/members")
-    public ResponseEntity<Map<String, Long>> join(@Valid @RequestBody MemberJoinDTO memberJoinDTO) {
+    public ResponseEntity<LoginResponse> join(@Valid @RequestBody MemberJoinDTO memberJoinDTO) {
 
         log.info("회원가입 Controller 호출");
         Long id = loginService.join(memberJoinDTO);
@@ -38,23 +42,36 @@ public class LoginController {
                 .buildAndExpand(id)
                 .toUri();
 
-        Map<String, Long> responseBody = new HashMap<>();
-        responseBody.put("id", id);
+        LoginResponse responseBody = new LoginResponse("id", id);
 
-        //201 Created
         return ResponseEntity
                 .created(location)
                 .body(responseBody);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String,Long>> login(@Valid @RequestBody MemberLoginDTO memberLoginDTO) {
-        HashMap<String, Long> responseBody = new HashMap<>();
+    public ResponseEntity<AccessTokenResponse> login(
+            @Valid @RequestBody MemberLoginDTO memberLoginDTO,
+            HttpServletResponse response) {
 
-        Long id = loginService.login(memberLoginDTO);
-        //URI 아직 생각 X, 추후에 추가해주기
-        responseBody.put("id", id);
+        TokenInfo tokenInfo = authService.login(memberLoginDTO);
 
-        return ResponseEntity.ok(responseBody);
+        int refreshTokenDuration = 7 * 24 * 60 * 60;
+
+        CookieUtil.addCookie(
+                response,
+                "refreshToken",
+                tokenInfo.getRefreshToken(),
+                refreshTokenDuration,
+                true,  // HttpOnly: JS 접근 불가 (XSS 방어)
+                false  // HTTPS쓰면 true로 바꾸기
+        );
+
+        AccessTokenResponse accessTokenResponse = new AccessTokenResponse(
+                tokenInfo.getGrantType(),
+                tokenInfo.getAccessToken()
+        );
+
+        return ResponseEntity.ok(accessTokenResponse);
     }
 }
