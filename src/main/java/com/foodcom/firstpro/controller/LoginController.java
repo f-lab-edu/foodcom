@@ -28,15 +28,11 @@ public class LoginController {
     @PostMapping("/members")
     public ResponseEntity<Void> join(@Valid @RequestBody MemberJoinDTO memberJoinDTO) {
 
-        String memberUuid = loginService.join(memberJoinDTO);
-
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{uuid}")
-                .buildAndExpand(memberUuid)
-                .toUri();
+        loginService.join(memberJoinDTO);
 
         return ResponseEntity
-                .created(location)
+                // 🟢 201 Created 상태 코드를 유지
+                .created(URI.create("/login")) // ⬅️ Location 헤더에 /login 경로 설정
                 .build();
     }
 

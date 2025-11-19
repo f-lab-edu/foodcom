@@ -11,6 +11,9 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@Table(indexes = {
+        @Index(name = "idx_member_id", columnList = "member_id")
+})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Post {
 
@@ -30,12 +33,4 @@ public class Post {
 
     @CreatedDate
     private LocalDateTime createdAt;
-
-    public static PostDto createPostDto(Post post) {
-        PostDto postDto = new PostDto();
-        postDto.setId(post.getId());
-        postDto.setTitle(post.getTitle());
-        postDto.setCreatedAt(post.createdAt);
-        return postDto;
-    }
 }

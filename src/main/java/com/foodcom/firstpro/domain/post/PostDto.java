@@ -1,5 +1,6 @@
 package com.foodcom.firstpro.domain.post;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -11,4 +12,9 @@ public class PostDto {
     private String title;
     private LocalDateTime createdAt;
 
+    public PostDto(Post post) {
+        this.id = post.getId();
+        this.title = post.getTitle();
+        this.createdAt = post.getCreatedAt();
+    }
 }

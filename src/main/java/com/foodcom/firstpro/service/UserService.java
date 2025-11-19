@@ -1,26 +1,32 @@
 package com.foodcom.firstpro.service;
 
 import com.foodcom.firstpro.domain.member.Member;
+import com.foodcom.firstpro.domain.member.MemberUpdateDto;
 import com.foodcom.firstpro.domain.post.MyPageResponse;
 import com.foodcom.firstpro.domain.post.Post;
 import com.foodcom.firstpro.domain.post.PostDto;
 import com.foodcom.firstpro.repository.LoginRepository;
 import com.foodcom.firstpro.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
     private final LoginRepository memberRepository;
     private final PostRepository postRepository;
+    private final BCryptPasswordEncoder encoder;
 
-    @Transactional
+    @Transactional(readOnly = true)
     public MyPageResponse getMyInfo(String userId) {
 
         Member member = memberRepository.findByLoginId(userId).orElseThrow(
@@ -28,7 +34,7 @@ public class UserService {
         );
         List<Post> postList = postRepository.findByMember(member);
         List<PostDto> postDtoList = postList.stream()
-                .map(Post::createPostDto)
+                .map(PostDto::new)
                 .toList();
 
         return MyPageResponse.builder()
@@ -39,4 +45,31 @@ public class UserService {
                 .gender(member.getGender())
                 .build();
     }
+
+    //만약 회원정보 수정 후 회원정보 반환값이 필요할 경우 DTO 반환
+    @Transactional
+    public void updateMyInfo(String userId, MemberUpdateDto memberUpdateDto) {
+
+        Member member = memberRepository.findByLoginId(userId).orElseThrow(
+                () -> new UsernameNotFoundException("인증된 사용자 ID를 찾을 수 없습니다: " + userId)
+        );
+
+        if (memberUpdateDto.getNewPassword() != null && !memberUpdateDto.getNewPassword().isEmpty()) {
+
+            String newPassword = memberUpdateDto.getNewPassword();
+
+            if (!StringUtils.hasText(newPassword)) {
+                throw new IllegalArgumentException("새 비밀번호는 공백이 될 수 없습니다.");
+            }
+            if (encoder.matches(newPassword, member.getPassword())) {
+                log.info("새 비밀번호가 기존 비밀번호와 동일합니다.");
+            } else {
+                String encodedPassword = encoder.encode(newPassword);
+                member.updatePassword(encodedPassword);
+                log.info("비밀번호를 성공적으로 업데이트했습니다.");
+            }
+        }
+        member.update(memberUpdateDto);
+    }
+
 }

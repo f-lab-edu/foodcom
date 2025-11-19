@@ -27,7 +27,6 @@ public class LoginService {
         memberJoinDTO.setPassword(encoder.encode(memberJoinDTO.getPassword()));
 
         Member member = Member.createMember(memberJoinDTO);
-        member.setUuid(UUID.randomUUID().toString());
         loginRepository.save(member);
 
         return member.getUuid();

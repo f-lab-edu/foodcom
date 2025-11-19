@@ -1,15 +1,15 @@
 package com.foodcom.firstpro.controller;
 
+import com.foodcom.firstpro.domain.member.MemberUpdateDto;
 import com.foodcom.firstpro.domain.post.MyPageResponse;
 import com.foodcom.firstpro.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -29,13 +29,15 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-//    @GetMapping("/edit")
-//    public ResponseEntity getEditForm() {
-//
-//    }
-//
-//    @PostMapping("/edit")
-//    public ResponseEntity updateMyInfo() {
-//
-//    }
+    @PatchMapping("/edit")
+    public ResponseEntity<Void> updateMyInfo(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody @Valid MemberUpdateDto updateDto
+    ) {
+        String userId = userDetails.getUsername();
+
+        userService.updateMyInfo(userId, updateDto);
+
+        return ResponseEntity.noContent().build();
+    }
 }
