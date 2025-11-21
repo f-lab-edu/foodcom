@@ -1,5 +1,6 @@
 package com.foodcom.firstpro.controller.advice;
 
+import com.foodcom.firstpro.auth.exception.LoginFailureException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -45,7 +46,14 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse("인증 실패", ex.getMessage()));
     }
 
-    //추후에 성별이나 다른 회원 정보의 중복을 방지하고 싶을 경우 DataIntegrityViolationException를 상속한 커스텀 예외 생성하기
+    @ExceptionHandler(LoginFailureException.class)
+    public ResponseEntity<ErrorResponse> handleLoginFailureException(LoginFailureException ex) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(new ErrorResponse("로그인 실패", ex.getMessage()));
+    }
+
+
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
         return ResponseEntity
@@ -55,7 +63,7 @@ public class GlobalExceptionHandler {
 
     @Data
     @AllArgsConstructor
-    static class ErrorResponse {
+    public static class ErrorResponse {
         private String code;
         private Object message;
     }
