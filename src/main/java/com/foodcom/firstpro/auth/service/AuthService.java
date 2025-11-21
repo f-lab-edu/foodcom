@@ -5,10 +5,12 @@ import com.foodcom.firstpro.auth.dto.TokenInfo;
 import com.foodcom.firstpro.auth.repository.RefreshTokenRepository;
 import com.foodcom.firstpro.auth.util.JwtTokenProvider;
 import com.foodcom.firstpro.domain.member.MemberLoginDTO;
+import com.foodcom.firstpro.auth.exception.LoginFailureException; // 💡 LoginFailureException import
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException; // 💡 AuthenticationException import
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,11 +30,20 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(memberLoginDTO.getLoginId(), memberLoginDTO.getPassword());
 
         // 2. 인증 매니저를 통해 실제 검증 수행 (loadUserByUsername 호출 및 비밀번호 매칭)
-        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+        Authentication authentication;
+        try {
+            // 인증 시도
+            authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+        } catch (AuthenticationException e) {
+            // 💡 [수정] 인증 실패(ID/PW 불일치) 시 Spring Security 예외를 잡아서
+            // 커스텀 LoginFailureException으로 전환하여 GlobalExceptionHandler로 전달
+            throw new LoginFailureException("아이디 또는 비밀번호가 일치하지 않습니다.", e);
+        }
 
         // 3. 인증 정보를 기반으로 JWT 토큰 생성
         TokenInfo tokenInfo = jwtTokenProvider.generateToken(authentication);
 
+        // 4. Refresh Token 저장
         RefreshToken refreshToken = RefreshToken.builder()
                 .loginId(authentication.getName())
                 .tokenValue(tokenInfo.getRefreshToken())

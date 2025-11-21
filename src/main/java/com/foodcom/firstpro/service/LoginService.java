@@ -9,8 +9,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
-
 
 @Slf4j
 @Service
@@ -22,6 +20,10 @@ public class LoginService {
 
     @Transactional
     public String join(MemberJoinDTO memberJoinDTO) {
+
+        if (loginRepository.findByLoginId(memberJoinDTO.getLoginId()).isPresent()) {
+            throw new IllegalStateException("이미 사용 중인 아이디입니다.");
+        }
 
         //단방향 해시 함수를 이용하여 비밀번호 암호화
         memberJoinDTO.setPassword(encoder.encode(memberJoinDTO.getPassword()));
