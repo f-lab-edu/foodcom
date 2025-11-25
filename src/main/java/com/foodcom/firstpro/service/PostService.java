@@ -36,25 +36,17 @@ public class PostService {
             throw new SecurityException("인증되지 않은 사용자입니다.");
         }
 
-        // 1단계: 인증 객체에서 사용자 이름(loginId) 추출
-        // authentication.getName()은 JWT의 Subject (여기서는 로그인 ID)입니다.
         String loginId = authentication.getName(); // testuser123
 
-        // 이전 코드의 NumberFormatException을 유발했던 try-catch 블록과 currentMemberId 선언을 제거했습니다.
         log.info(">> [Service] 1단계 성공: SecurityContext에서 사용자 이름({}) 추출 완료.", loginId);
 
-
-        // 2단계: 사용자 이름(loginId)을 기준으로 DB에서 Member 조회
-        // memberRepository에 findByLoginId 또는 findByUsername 메서드가 정의되어 있어야 합니다.
         log.info(">> [Service] 2단계 시작: 사용자 이름({})으로 DB에서 사용자 조회.", loginId);
 
-        // MemberRepository에 Optional<Member> findByLoginId(String loginId);가 정의되어 있다고 가정합니다.
         Member member = memberRepository.findByLoginId(loginId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다. (Username: " + loginId + ")"));
         log.info(">> [Service] 2단계 성공: 사용자({}) 조회 완료.", member.getLoginId()); // 조회된 loginId 로그
 
 
-        // 3단계: Post 객체 생성 및 저장
         Post post = Post.builder()
                 .title(title)
                 .content(content)
@@ -65,7 +57,6 @@ public class PostService {
         log.info(">> [Service] 3단계 성공: Post({}) DB 저장 완료.", post.getId());
 
 
-        // 4, 5단계: 파일 처리 (imageFiles가 null이 아닐 경우)
         if (imageFiles != null) {
             for (MultipartFile file : imageFiles) {
                 if (file != null && !file.isEmpty()) {
