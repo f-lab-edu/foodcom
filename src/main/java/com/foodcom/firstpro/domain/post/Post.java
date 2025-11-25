@@ -2,12 +2,14 @@ package com.foodcom.firstpro.domain.post;
 
 import com.foodcom.firstpro.domain.member.Member;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -15,6 +17,9 @@ import java.time.LocalDateTime;
         @Index(name = "idx_member_id", columnList = "member_id")
 })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
+@EntityListeners(AuditingEntityListener.class)
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class Post {
 
     @Id
@@ -31,6 +36,21 @@ public class Post {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Image> images = new ArrayList<>();
+
     @CreatedDate
+    @Column(updatable = false)
     private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    private LocalDateTime modifiedAt;
+
+    public void addImage(Image image) {
+        this.images.add(image);
+        if (image.getPost() != this) {
+            image.setPost(this);
+        }
+    }
 }

@@ -6,3 +6,5 @@
 # Gradle Build Files
 /build/
 .gradle/
+
+application.properties

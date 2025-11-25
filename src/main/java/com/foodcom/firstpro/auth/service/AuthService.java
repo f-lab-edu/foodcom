@@ -32,11 +32,8 @@ public class AuthService {
         // 2. 인증 매니저를 통해 실제 검증 수행 (loadUserByUsername 호출 및 비밀번호 매칭)
         Authentication authentication;
         try {
-            // 인증 시도
             authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
         } catch (AuthenticationException e) {
-            // 💡 [수정] 인증 실패(ID/PW 불일치) 시 Spring Security 예외를 잡아서
-            // 커스텀 LoginFailureException으로 전환하여 GlobalExceptionHandler로 전달
             throw new LoginFailureException("아이디 또는 비밀번호가 일치하지 않습니다.", e);
         }
 

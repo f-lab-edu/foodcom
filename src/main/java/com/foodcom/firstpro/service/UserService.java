@@ -5,7 +5,7 @@ import com.foodcom.firstpro.domain.member.MemberUpdateDto;
 import com.foodcom.firstpro.domain.post.MyPageResponse;
 import com.foodcom.firstpro.domain.post.Post;
 import com.foodcom.firstpro.domain.post.PostDto;
-import com.foodcom.firstpro.repository.LoginRepository;
+import com.foodcom.firstpro.repository.MemberRepository;
 import com.foodcom.firstpro.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
 
-    private final LoginRepository memberRepository;
+    private final MemberRepository memberRepository;
     private final PostRepository postRepository;
     private final BCryptPasswordEncoder encoder;
 

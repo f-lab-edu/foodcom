@@ -70,10 +70,11 @@ public class JwtTokenProvider {
         Claims claims = parseClaims(accessToken);
 
         if (claims.get("auth") == null) {
-//            throw new RuntimeException("권한 정보가 없는 토큰입니다.");
+            log.error(">> 인증 실패: 권한 정보(auth 클레임)가 없는 토큰입니다. Subject: {}", claims.getSubject());
             throw new BadCredentialsException("권한 정보가 없는 토큰입니다. (인증 실패)");
         }
 
+        log.info(">> getAuthentication 성공: 사용자 ID({})의 권한 정보 추출 완료.", claims.getSubject());
         // 클레임에서 권한 정보 가져오기
         Collection<? extends GrantedAuthority> authorities =
                 Arrays.stream(claims.get("auth").toString().split(","))

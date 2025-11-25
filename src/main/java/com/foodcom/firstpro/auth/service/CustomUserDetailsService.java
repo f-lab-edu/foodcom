@@ -1,7 +1,7 @@
 package com.foodcom.firstpro.auth.service;
 
 import com.foodcom.firstpro.domain.member.Member;
-import com.foodcom.firstpro.repository.LoginRepository;
+import com.foodcom.firstpro.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -18,18 +18,14 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final LoginRepository loginRepository;
+    private final MemberRepository memberRepository;
 
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String loginId) throws UsernameNotFoundException {
 
-        return loginRepository.findByLoginId(loginId)
+        return memberRepository.findByLoginId(loginId)
                 .map(this::createUserDetails)
-
-                /**
-                 * 나중에 GlobalExceptionHandler에서 예외 처리하기
-                 */
                 .orElseThrow(() -> new UsernameNotFoundException("아이디를 찾을 수 없습니다: " + loginId));
     }
 
