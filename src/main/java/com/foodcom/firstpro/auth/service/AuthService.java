@@ -2,6 +2,7 @@ package com.foodcom.firstpro.auth.service;
 
 import com.foodcom.firstpro.auth.domain.RefreshToken;
 import com.foodcom.firstpro.auth.dto.TokenInfo;
+import com.foodcom.firstpro.auth.exception.TokenException;
 import com.foodcom.firstpro.auth.repository.RefreshTokenRepository;
 import com.foodcom.firstpro.auth.util.JwtTokenProvider;
 import com.foodcom.firstpro.domain.member.MemberLoginDTO;
@@ -49,5 +50,34 @@ public class AuthService {
         refreshTokenRepository.save(refreshToken);
 
         return tokenInfo;
+    }
+
+    public TokenInfo reissue(String refreshToken) {
+        if (!jwtTokenProvider.validateToken(refreshToken)) {
+            throw new TokenException("Refresh Token이 만료되었거나 유효하지 않습니다. 재로그인이 필요합니다.");
+        }
+
+        String loginId = jwtTokenProvider.getLoginIdFromToken(refreshToken);
+
+        RefreshToken storedToken = refreshTokenRepository.findById(loginId)
+                .orElseThrow(() -> new TokenException("Refresh Token 정보가 저장소에 없습니다. 재로그인이 필요합니다."));
+
+        if (!storedToken.getTokenValue().equals(refreshToken)) {
+            refreshTokenRepository.delete(storedToken);
+            throw new TokenException("유효하지 않은 Refresh Token입니다. 재로그인이 필요합니다.");
+        }
+
+        TokenInfo newTokenInfo = jwtTokenProvider.generateToken(loginId);
+
+        refreshTokenRepository.delete(storedToken);
+
+        RefreshToken newRefreshToken = RefreshToken.builder()
+                .loginId(loginId)
+                .tokenValue(newTokenInfo.getRefreshToken())
+                .build();
+
+        refreshTokenRepository.save(newRefreshToken);
+
+        return newTokenInfo;
     }
 }

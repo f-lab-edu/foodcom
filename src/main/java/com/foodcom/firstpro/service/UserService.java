@@ -4,7 +4,7 @@ import com.foodcom.firstpro.domain.member.Member;
 import com.foodcom.firstpro.domain.member.MemberUpdateDto;
 import com.foodcom.firstpro.domain.post.MyPageResponse;
 import com.foodcom.firstpro.domain.post.Post;
-import com.foodcom.firstpro.domain.post.PostDto;
+import com.foodcom.firstpro.domain.post.PostResponseDto;
 import com.foodcom.firstpro.repository.MemberRepository;
 import com.foodcom.firstpro.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
@@ -33,13 +33,13 @@ public class UserService {
                 () -> new UsernameNotFoundException("사용자 id를 찾을 수 없습니다: " + userId)
         );
         List<Post> postList = postRepository.findByMember(member);
-        List<PostDto> postDtoList = postList.stream()
-                .map(PostDto::new)
+        List<PostResponseDto> postResponseDtoList = postList.stream()
+                .map(PostResponseDto::new)
                 .toList();
 
         return MyPageResponse.builder()
                 .loginId(member.getLoginId())
-                .posts(postDtoList)
+                .posts(postResponseDtoList)
                 .username(member.getUsername())
                 .age(member.getAge())
                 .gender(member.getGender())

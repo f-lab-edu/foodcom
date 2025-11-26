@@ -26,7 +26,7 @@ public class PostService {
     private final MemberRepository memberRepository;
     private final StorageService storageService;
 
-    @Transactional // 데이터를 변경하는 작업이므로 쓰기 트랜잭션 필요
+    @Transactional
     public Post createPost(String title, String content, List<MultipartFile> imageFiles) throws IOException {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

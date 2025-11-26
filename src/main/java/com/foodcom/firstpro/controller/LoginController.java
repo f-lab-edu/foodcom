@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,6 +32,8 @@ public class LoginController {
 
     private final LoginService loginService;
     private final AuthService authService;
+    @Value("${jwt.refresh.expiration}")
+    private int refreshTokenMaxAge;
 
     @Operation(summary = "회원 가입", description = "회원가입을 하고 완료하면 /login으로 경로 설정")
     @ApiResponse(
@@ -114,13 +117,11 @@ public class LoginController {
 
         TokenInfo tokenInfo = authService.login(memberLoginDTO);
 
-        int refreshTokenDuration = 7 * 24 * 60 * 60;
-
         CookieUtil.addCookie(
                 response,
                 "refreshToken",
                 tokenInfo.getRefreshToken(),
-                refreshTokenDuration,
+                refreshTokenMaxAge,
                 true,  // HttpOnly: JS 접근 불가 (XSS 방어)
                 false  // HTTPS쓰면 true로 바꾸기
         );

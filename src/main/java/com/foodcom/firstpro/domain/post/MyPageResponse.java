@@ -15,6 +15,6 @@ public class MyPageResponse {
 
     private final Gender gender;
     private final Integer age;
-    private List<PostDto> posts;
+    private List<PostResponseDto> posts;
 
 }

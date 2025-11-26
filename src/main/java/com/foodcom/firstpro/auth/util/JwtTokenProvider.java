@@ -1,5 +1,6 @@
 package com.foodcom.firstpro.auth.util;
 
+import com.foodcom.firstpro.auth.domain.RefreshToken;
 import com.foodcom.firstpro.auth.dto.TokenInfo;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -38,21 +39,32 @@ public class JwtTokenProvider {
         this.refreshExpiration = refreshExpiration;
     }
 
+    //로그인 할때 사용
     public TokenInfo generateToken(Authentication authentication) {
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
 
+        return generateToken(authentication.getName(), authorities);
+    }
+
+    //재발급 할때 사용
+    public TokenInfo generateToken(String loginId) {
+        return generateToken(loginId, "ROLE_USER");
+    }
+
+    private TokenInfo generateToken(String subject, String authorities) {
         long now = (new Date()).getTime();
 
         String accessToken = Jwts.builder()
-                .setSubject(authentication.getName())
+                .setSubject(subject)
                 .claim("auth", authorities)
                 .setExpiration(new Date(now + accessExpiration))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
 
         String refreshToken = Jwts.builder()
+                .setSubject(subject)
                 .setExpiration(new Date(now + refreshExpiration))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
@@ -104,6 +116,18 @@ public class JwtTokenProvider {
         return false;
     }
 
+    public String getLoginIdFromToken(String token) {
+        Claims claims = parseClaims(token);
+        String loginId = claims.getSubject();
+
+        if (loginId == null || loginId.isEmpty()) {
+            log.error(">> 토큰에서 사용자 ID(Subject) 추출 실패. 토큰 포맷 오류.");
+            throw new BadCredentialsException("토큰에 사용자 ID 정보가 포함되어 있지 않습니다.");
+        }
+
+        return loginId;
+    }
+
     private Claims parseClaims(String accessToken) {
         try {
             return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken).getBody();
@@ -112,5 +136,4 @@ public class JwtTokenProvider {
             return e.getClaims();
         }
     }
-
 }
