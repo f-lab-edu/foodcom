@@ -11,10 +11,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @Tag(name = "인증 관리", description = "로그인 및 토큰 재발급 API")
 @RestController
 @RequiredArgsConstructor
@@ -36,7 +38,7 @@ public class AuthController {
     @PostMapping("/reissue")
     public ResponseEntity<TokenInfo> reissueAccessToken(
             @CookieValue(name = "refresh_token", required = false) String refreshToken,
-            HttpServletResponse response) {
+            HttpServletResponse response) {log.info(">>>> [Reissue 요청 진입] refreshToken 값: {}", refreshToken);
 
         if (refreshToken == null) {
             throw new TokenException("Refresh Token 쿠키가 존재하지 않습니다. 재로그인이 필요합니다.");

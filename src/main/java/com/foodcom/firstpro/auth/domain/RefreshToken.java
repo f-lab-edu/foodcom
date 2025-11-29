@@ -13,9 +13,6 @@ import org.springframework.data.redis.core.index.Indexed;
 @RedisHash(value = "refreshToken", timeToLive = 604800)
 public class RefreshToken {
 
-    /**
-     * Springframework Id랑 jakarata Id 차이 찾아보기
-     */
     @Id
     private String loginId;
 

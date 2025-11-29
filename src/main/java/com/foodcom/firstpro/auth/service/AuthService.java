@@ -6,12 +6,12 @@ import com.foodcom.firstpro.auth.exception.TokenException;
 import com.foodcom.firstpro.auth.repository.RefreshTokenRepository;
 import com.foodcom.firstpro.auth.util.JwtTokenProvider;
 import com.foodcom.firstpro.domain.member.MemberLoginDTO;
-import com.foodcom.firstpro.auth.exception.LoginFailureException; // 💡 LoginFailureException import
+import com.foodcom.firstpro.auth.exception.LoginFailureException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException; // 💡 AuthenticationException import
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

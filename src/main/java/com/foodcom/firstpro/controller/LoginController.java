@@ -119,7 +119,7 @@ public class LoginController {
 
         CookieUtil.addCookie(
                 response,
-                "refreshToken",
+                "refresh_token",
                 tokenInfo.getRefreshToken(),
                 refreshTokenMaxAge,
                 true,  // HttpOnly: JS 접근 불가 (XSS 방어)
