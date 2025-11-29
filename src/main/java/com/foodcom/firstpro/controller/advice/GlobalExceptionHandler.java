@@ -1,6 +1,7 @@
 package com.foodcom.firstpro.controller.advice;
 
 import com.foodcom.firstpro.auth.exception.LoginFailureException;
+import com.foodcom.firstpro.auth.exception.ResourceNotFoundException;
 import com.foodcom.firstpro.auth.exception.TokenException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -90,7 +91,13 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse("Internal Server Error", "서버 처리 중 예상치 못한 오류가 발생했습니다."));
     }
 
-    // 6. 서버
+    // 찾는 리소스 없을 경우 404 -> 게시물 못 찾음
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFoundException(ResourceNotFoundException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND) // 404
+                .body(new ErrorResponse("Resource Not Found", ex.getMessage()));
+    }
 
     // --- ErrorResponse DTO ---
     @Data

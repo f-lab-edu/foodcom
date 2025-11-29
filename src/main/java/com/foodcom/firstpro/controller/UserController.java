@@ -51,8 +51,8 @@ public class UserController {
     public ResponseEntity<MyPageResponse> getMyInfo(
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        String userId = userDetails.getUsername();
-        MyPageResponse response = userService.getMyInfo(userId);
+        String loginId = userDetails.getUsername();
+        MyPageResponse response = userService.getMyInfo(loginId);
 
         return ResponseEntity.ok(response);
     }

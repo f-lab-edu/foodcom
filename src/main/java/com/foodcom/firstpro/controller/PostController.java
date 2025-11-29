@@ -3,6 +3,7 @@ package com.foodcom.firstpro.controller;
 import com.foodcom.firstpro.controller.advice.GlobalExceptionHandler;
 import com.foodcom.firstpro.domain.post.Post;
 import com.foodcom.firstpro.domain.post.PostRequestDto;
+import com.foodcom.firstpro.domain.post.PostResponseDto;
 import com.foodcom.firstpro.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,6 +19,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -90,13 +93,11 @@ public class PostController {
             @RequestPart(value = "files", required = false) List<MultipartFile> imageFiles
     ) {
         try {
-            log.info("createPost시작");
             Post newPost = postService.createPost(
                     requestDto.getTitle(),
                     requestDto.getContent(),
                     imageFiles
             );
-            log.info("postService 종료");
 
             URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                     .path("/{id}")
@@ -111,5 +112,41 @@ public class PostController {
         } catch (IllegalArgumentException e) {
             throw e;
         }
+    }
+
+    @Operation(summary = "게시물 상세 조회", description = "UUID를 통해 특정 게시물의 상세 정보를 조회합니다.")
+    @ApiResponses(value = {
+            // 200 OK
+            @ApiResponse(responseCode = "200", description = "조회 성공",
+                    content = @Content(schema = @Schema(implementation = PostResponseDto.class))),
+
+            // 404 Not Found (게시물이 없을 때)
+            @ApiResponse(responseCode = "404", description = "게시물을 찾을 수 없음 (잘못된 UUID)",
+                    content = @Content(
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class),
+                            examples = @ExampleObject(
+                                    name = "게시물 없음",
+                                    summary = "존재하지 않는 UUID로 조회 시",
+                                    value = "{\"code\": \"Resource Not Found\", \"message\": \"게시물을 찾을 수 없습니다. Uuid = 550e8400-e29b-41d4-a716-446655440000\"}"
+                            )
+                    )),
+
+            // 500 Internal Server Error
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류",
+                    content = @Content(
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class),
+                            examples = @ExampleObject(
+                                    name = "서버 에러 예시",
+                                    value = "{\"code\": \"Internal Server Error\", \"message\": \"서버 처리 중 예상치 못한 오류가 발생했습니다.\"}"
+                            )
+                    ))
+    })
+    @GetMapping("/{postUuid}")
+    public ResponseEntity<PostResponseDto> viewPost(
+            @Parameter(description = "게시물 UUID", required = true)
+            @PathVariable("postUuid") String postUuid
+    ) {
+        PostResponseDto postInfo = postService.getPostInfo(postUuid);
+        return ResponseEntity.ok(postInfo);
     }
 }

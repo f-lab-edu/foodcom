@@ -1,5 +1,6 @@
 package com.foodcom.firstpro.domain.post;
 
+import com.foodcom.firstpro.domain.comment.Comment;
 import com.foodcom.firstpro.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.*;
@@ -10,6 +11,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -25,6 +27,10 @@ public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false, unique = true, updatable = false)
+    @Builder.Default
+    String uuid = UUID.randomUUID().toString();
 
     @Column(nullable = false, length = 100)
     private String title;
@@ -46,6 +52,10 @@ public class Post {
 
     @LastModifiedDate
     private LocalDateTime modifiedAt;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Comment> comments = new ArrayList<>();
 
     public void addImage(Image image) {
         this.images.add(image);

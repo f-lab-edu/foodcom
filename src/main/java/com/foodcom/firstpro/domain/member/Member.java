@@ -1,9 +1,13 @@
 package com.foodcom.firstpro.domain.member;
 
+import com.foodcom.firstpro.domain.comment.Comment;
+import com.foodcom.firstpro.domain.post.Post;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -36,6 +40,11 @@ public class Member {
     @NotNull
     private Integer age;
 
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Post> posts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
 
     public void update(MemberUpdateDto memberUpdateDto) {
 

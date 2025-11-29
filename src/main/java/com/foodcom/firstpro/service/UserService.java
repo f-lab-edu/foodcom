@@ -4,7 +4,7 @@ import com.foodcom.firstpro.domain.member.Member;
 import com.foodcom.firstpro.domain.member.MemberUpdateDto;
 import com.foodcom.firstpro.domain.post.MyPageResponse;
 import com.foodcom.firstpro.domain.post.Post;
-import com.foodcom.firstpro.domain.post.PostResponseDto;
+import com.foodcom.firstpro.domain.post.PostListResponseDto;
 import com.foodcom.firstpro.repository.MemberRepository;
 import com.foodcom.firstpro.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,19 +27,19 @@ public class UserService {
     private final BCryptPasswordEncoder encoder;
 
     @Transactional(readOnly = true)
-    public MyPageResponse getMyInfo(String userId) {
+    public MyPageResponse getMyInfo(String loginId) {
 
-        Member member = memberRepository.findByLoginId(userId).orElseThrow(
-                () -> new UsernameNotFoundException("사용자 id를 찾을 수 없습니다: " + userId)
+        Member member = memberRepository.findByLoginId(loginId).orElseThrow(
+                () -> new UsernameNotFoundException("사용자 id를 찾을 수 없습니다: " + loginId)
         );
         List<Post> postList = postRepository.findByMember(member);
-        List<PostResponseDto> postResponseDtoList = postList.stream()
-                .map(PostResponseDto::new)
+        List<PostListResponseDto> postListResponseDtoList = postList.stream()
+                .map(PostListResponseDto::new)
                 .toList();
 
         return MyPageResponse.builder()
                 .loginId(member.getLoginId())
-                .posts(postResponseDtoList)
+                .posts(postListResponseDtoList)
                 .username(member.getUsername())
                 .age(member.getAge())
                 .gender(member.getGender())
