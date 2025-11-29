@@ -63,4 +63,11 @@ public class Post {
             image.setPost(this);
         }
     }
+
+    public void addComment(Comment comment) {
+        this.comments.add(comment);
+        if (comment.getPost() != this) {
+            comment.setPost(this);
+        }
+    }
 }
