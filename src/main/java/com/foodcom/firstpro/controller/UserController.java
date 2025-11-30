@@ -49,10 +49,12 @@ public class UserController {
     )
     @GetMapping("")
     public ResponseEntity<MyPageResponse> getMyInfo(
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(value = "page", defaultValue = "1") int page
     ) {
         String loginId = userDetails.getUsername();
-        MyPageResponse response = userService.getMyInfo(loginId);
+        int pageIndex = (page <= 0) ? 0 : page - 1;
+        MyPageResponse response = userService.getMyInfo(loginId, pageIndex);
 
         return ResponseEntity.ok(response);
     }
@@ -92,7 +94,7 @@ public class UserController {
                     )
             )
     )
-    @PatchMapping("/edit")
+    @PatchMapping("")
     public ResponseEntity<Void> updateMyInfo(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody @Valid MemberUpdateDto updateDto

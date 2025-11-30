@@ -9,6 +9,10 @@ import com.foodcom.firstpro.repository.MemberRepository;
 import com.foodcom.firstpro.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,22 +31,32 @@ public class UserService {
     private final BCryptPasswordEncoder encoder;
 
     @Transactional(readOnly = true)
-    public MyPageResponse getMyInfo(String loginId) {
+    public MyPageResponse getMyInfo(String loginId, int page) {
 
         Member member = memberRepository.findByLoginId(loginId).orElseThrow(
                 () -> new UsernameNotFoundException("사용자 id를 찾을 수 없습니다: " + loginId)
         );
-        List<Post> postList = postRepository.findByMember(member);
-        List<PostListResponseDto> postListResponseDtoList = postList.stream()
+        Pageable pageable = PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "modifedAt"));
+        Page<Post> postPage = postRepository.findByMember(member, pageable);
+        List<PostListResponseDto> postListResponseDtoList = postPage.stream()
                 .map(PostListResponseDto::new)
                 .toList();
 
         return MyPageResponse.builder()
                 .loginId(member.getLoginId())
-                .posts(postListResponseDtoList)
                 .username(member.getUsername())
                 .age(member.getAge())
                 .gender(member.getGender())
+
+                // 게시물 리스트
+                .posts(postListResponseDtoList)
+
+                // 메타데이터
+                .totalElements(postPage.getTotalElements())
+                .totalPages(postPage.getTotalPages())
+                .last(postPage.isLast())
+                .size(postPage.getSize())
+                .number(postPage.getNumber() + 1)
                 .build();
     }
 
