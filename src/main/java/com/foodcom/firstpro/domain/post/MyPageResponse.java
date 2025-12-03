@@ -15,7 +15,7 @@ public class MyPageResponse {
     private final Gender gender;
     private final Integer age;
 
-    private List<PostListResponseDto> posts;
+    private List<MyPostListResponseDto> posts;
 
     private long totalElements; // 전체 게시물 수
     private int totalPages;     // 전체 페이지 수

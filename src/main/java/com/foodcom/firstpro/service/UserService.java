@@ -4,7 +4,7 @@ import com.foodcom.firstpro.domain.member.Member;
 import com.foodcom.firstpro.domain.member.MemberUpdateDto;
 import com.foodcom.firstpro.domain.post.MyPageResponse;
 import com.foodcom.firstpro.domain.post.Post;
-import com.foodcom.firstpro.domain.post.PostListResponseDto;
+import com.foodcom.firstpro.domain.post.MyPostListResponseDto;
 import com.foodcom.firstpro.repository.MemberRepository;
 import com.foodcom.firstpro.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
@@ -36,8 +36,8 @@ public class UserService {
         );
 
         Page<Post> postPage = postRepository.findByMember(member, pageable);
-        List<PostListResponseDto> postListResponseDtoList = postPage.stream()
-                .map(PostListResponseDto::new)
+        List<MyPostListResponseDto> myPostListResponseDtoList = postPage.stream()
+                .map(MyPostListResponseDto::new)
                 .toList();
 
         return MyPageResponse.builder()
@@ -47,7 +47,7 @@ public class UserService {
                 .gender(member.getGender())
 
                 // 게시물 리스트
-                .posts(postListResponseDtoList)
+                .posts(myPostListResponseDtoList)
 
                 // 메타데이터
                 .totalElements(postPage.getTotalElements())

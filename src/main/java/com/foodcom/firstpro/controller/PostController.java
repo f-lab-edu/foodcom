@@ -28,6 +28,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 @Slf4j
@@ -229,5 +230,53 @@ public class PostController {
         postService.updatePost(postUuid, updateDto, newFiles, userDetails.getUsername());
 
         return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "게시물 삭제", description = "특정 게시물과 연관된 모든 이미지, 댓글을 영구 삭제합니다.")
+    @ApiResponses(value = {
+            // 204 No Content (삭제 성공 시 본문 없음)
+            @ApiResponse(responseCode = "204", description = "삭제 성공"),
+
+            // 401 Unauthorized
+            @ApiResponse(responseCode = "401", description = "인증 실패 (토큰 없음)",
+                    content = @Content(
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class),
+                            examples = @ExampleObject(
+                                    name = "인증 실패",
+                                    value = "{\"code\": \"인증 실패\", \"message\": \"Access Token이 유효하지 않거나 필요합니다.\"}"
+                            )
+                    )),
+
+            // 403 Forbidden
+            @ApiResponse(responseCode = "403", description = "권한 없음 (작성자만 삭제 가능)",
+                    content = @Content(
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class),
+                            examples = @ExampleObject(
+                                    name = "권한 없음",
+                                    value = "{\"code\": \"권한 없음\", \"message\": \"작성자만 게시물을 삭제할 수 있습니다.\"}"
+                            )
+                    )),
+
+            // 404 Not Found
+            @ApiResponse(responseCode = "404", description = "게시물을 찾을 수 없음",
+                    content = @Content(
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class),
+                            examples = @ExampleObject(
+                                    name = "게시물 없음",
+                                    value = "{\"code\": \"Resource Not Found\", \"message\": \"게시물을 찾을 수 없습니다.\"}"
+                            )
+                    ))
+    })
+    @DeleteMapping("/{postUuid}")
+    public ResponseEntity<Void> deletePost(
+            @Parameter(description = "삭제할 게시물 UUID", required = true, example = "550e8400-e29b-41d4-a716-446655440000")
+            @PathVariable("postUuid") String postUuid,
+
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal UserDetails userDetails
+    ) throws AccessDeniedException {
+        postService.deletePost(postUuid, userDetails.getUsername());
+
+        return ResponseEntity.noContent().build();
     }
 }

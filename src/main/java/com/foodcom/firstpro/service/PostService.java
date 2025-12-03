@@ -129,4 +129,22 @@ public class PostService {
     }
 
 
+    public void deletePost(String postUuid, String username) throws AccessDeniedException {
+
+        Post post = postRepository.findByUuid(postUuid)
+                .orElseThrow(() -> new ResourceNotFoundException("게시물을 찾을 수 없습니다."));
+
+        if (!post.getMember().getLoginId().equals(username)) {
+            throw new AccessDeniedException("작성자만 게시물을 삭제할 수 있습니다.");
+        }
+
+        List<Image> images = post.getImages();
+        if (images != null && !images.isEmpty()) {
+            for (Image image : images) {
+                storageService.deleteFile(image.getUrl());
+            }
+        }
+
+        postRepository.delete(post);
+    }
 }
