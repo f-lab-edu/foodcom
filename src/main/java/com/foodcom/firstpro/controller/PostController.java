@@ -1,11 +1,10 @@
 package com.foodcom.firstpro.controller;
 
 import com.foodcom.firstpro.controller.advice.GlobalExceptionHandler;
-import com.foodcom.firstpro.domain.comment.CommentCreateDto;
 import com.foodcom.firstpro.domain.post.Post;
-import com.foodcom.firstpro.domain.post.PostRequestDto;
+import com.foodcom.firstpro.domain.post.PostCreateRequestDto;
 import com.foodcom.firstpro.domain.post.PostResponseDto;
-import com.foodcom.firstpro.service.CommentService;
+import com.foodcom.firstpro.domain.post.PostUpdateRequestDto;
 import com.foodcom.firstpro.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -19,7 +18,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -40,7 +38,6 @@ import java.util.List;
 public class PostController {
 
     private final PostService postService;
-    private final CommentService commentService;
 
     @Operation(summary = "새 게시물 및 이미지 생성",
             description = "인증된 사용자가 제목, 내용, 첨부 파일(선택)을 포함하여 새 게시물을 생성합니다. 성공 시 Location 헤더에 새 리소스 URI를 반환합니다."
@@ -82,10 +79,10 @@ public class PostController {
                     description = "게시물 제목 및 내용 (JSON 형식)", required = true,
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = PostRequestDto.class)
+                            schema = @Schema(implementation = PostCreateRequestDto.class)
                     )
             )
-            @RequestPart("data") @Valid PostRequestDto requestDto,
+            @RequestPart("data") @Valid PostCreateRequestDto requestDto,
 
             @Parameter(
                     description = "첨부할 이미지 파일 리스트", required = false,
@@ -153,5 +150,84 @@ public class PostController {
         return ResponseEntity.ok(postInfo);
     }
 
+    @Operation(summary = "게시물 수정", description = "제목, 내용을 수정하고, 기존 이미지를 삭제하거나 새 이미지를 추가합니다.")
+    @ApiResponses(value = {
+            // 200 OK
+            @ApiResponse(responseCode = "200", description = "수정 성공",
+                    content = @Content(schema = @Schema(implementation = Void.class))),
 
+            // 400 Bad Request
+            @ApiResponse(responseCode = "400", description = "입력값 유효성 검사 실패 (JSON 형식 오류 등)",
+                    content = @Content(
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class),
+                            examples = @ExampleObject(
+                                    name = "유효성 검사 실패",
+                                    value = "{\"code\": \"Validation Failed\", \"message\": {\"title\": \"제목은 100자 이하여야 합니다.\"}}"
+                            )
+                    )),
+
+            // 401 Unauthorized
+            @ApiResponse(responseCode = "401", description = "인증 실패 (토큰 없음)",
+                    content = @Content(
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class),
+                            examples = @ExampleObject(
+                                    name = "인증 실패",
+                                    value = "{\"code\": \"인증 실패\", \"message\": \"Access Token이 유효하지 않거나 필요합니다.\"}"
+                            )
+                    )),
+
+            // 403 Forbidden (작성자가 아님)
+            @ApiResponse(responseCode = "403", description = "권한 없음 (작성자만 수정 가능)",
+                    content = @Content(
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class),
+                            examples = @ExampleObject(
+                                    name = "권한 없음",
+                                    value = "{\"code\": \"권한 없음\", \"message\": \"작성자만 게시물을 수정할 수 있습니다.\"}"
+                            )
+                    )),
+
+            // 404 Not Found
+            @ApiResponse(responseCode = "404", description = "게시물을 찾을 수 없음",
+                    content = @Content(
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class),
+                            examples = @ExampleObject(
+                                    name = "게시물 없음",
+                                    value = "{\"code\": \"Resource Not Found\", \"message\": \"게시물을 찾을 수 없습니다.\"}"
+                            )
+                    )),
+
+            // 500 Internal Server Error
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류 (파일 업로드 실패 등)",
+                    content = @Content(
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class),
+                            examples = @ExampleObject(
+                                    name = "파일 오류",
+                                    value = "{\"code\": \"File Upload Error\", \"message\": \"파일 처리 중 오류가 발생했습니다.\"}"
+                            )
+                    ))
+    })
+    @PatchMapping(value = "/{postUuid}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Void> updatePost(
+            @PathVariable("postUuid") String postUuid,
+
+            @Parameter(
+                    description = "수정할 데이터 (JSON)",
+                    required = true,
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            )
+            @RequestPart("data") @Valid PostUpdateRequestDto updateDto,
+
+            // 2. 파일 파트
+            @Parameter(
+                    description = "새로 추가할 이미지 파일 리스트",
+                    required = false
+            )
+            @RequestPart(value = "files", required = false) List<MultipartFile> newFiles,
+
+            @AuthenticationPrincipal UserDetails userDetails
+    ) throws IOException {
+        postService.updatePost(postUuid, updateDto, newFiles, userDetails.getUsername());
+
+        return ResponseEntity.ok().build();
+    }
 }

@@ -10,9 +10,7 @@ import com.foodcom.firstpro.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -31,12 +29,12 @@ public class UserService {
     private final BCryptPasswordEncoder encoder;
 
     @Transactional(readOnly = true)
-    public MyPageResponse getMyInfo(String loginId, int page) {
+    public MyPageResponse getMyPageDetails(String loginId, Pageable pageable) {
 
         Member member = memberRepository.findByLoginId(loginId).orElseThrow(
                 () -> new UsernameNotFoundException("사용자 id를 찾을 수 없습니다: " + loginId)
         );
-        Pageable pageable = PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "modifedAt"));
+
         Page<Post> postPage = postRepository.findByMember(member, pageable);
         List<PostListResponseDto> postListResponseDtoList = postPage.stream()
                 .map(PostListResponseDto::new)

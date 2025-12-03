@@ -13,6 +13,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -53,8 +56,12 @@ public class UserController {
             @RequestParam(value = "page", defaultValue = "1") int page
     ) {
         String loginId = userDetails.getUsername();
+
         int pageIndex = (page <= 0) ? 0 : page - 1;
-        MyPageResponse response = userService.getMyInfo(loginId, pageIndex);
+
+        Pageable pageable = PageRequest.of(pageIndex, 10, Sort.by(Sort.Direction.DESC, "modifiedAt"));
+
+        MyPageResponse response = userService.getMyPageDetails(loginId, pageable);
 
         return ResponseEntity.ok(response);
     }

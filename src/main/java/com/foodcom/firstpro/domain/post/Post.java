@@ -64,10 +64,16 @@ public class Post {
         }
     }
 
-    public void addComment(Comment comment) {
-        this.comments.add(comment);
-        if (comment.getPost() != this) {
-            comment.setPost(this);
+    public void updateText(String title, String content) {
+        if (title != null && !title.isBlank()) {
+            this.title = title;
         }
+        if (content != null && !content.isBlank()) {
+            this.content = content;
+        }
+    }
+
+    public void removeImage(Long imageId) {
+        this.images.removeIf(img -> img.getId().equals(imageId));
     }
 }

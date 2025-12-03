@@ -13,6 +13,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.nio.file.AccessDeniedException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -97,6 +98,22 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND) // 404
                 .body(new ErrorResponse("Resource Not Found", ex.getMessage()));
+    }
+
+    // 403
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException e) {
+        ErrorResponse response = new ErrorResponse("권한 없음", "작성자만 수정/삭제할 수 있습니다.");
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
+    // 파일 입출력 예외 (HTTP 500)
+    @ExceptionHandler(java.io.IOException.class)
+    public ResponseEntity<ErrorResponse> handleIOException(java.io.IOException ex) {
+        log.error(">> 파일 업로드 처리 중 오류 발생: {}", ex.getMessage(), ex);
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorResponse("File Upload Error", "파일 처리 중 오류가 발생했습니다."));
     }
 
     // --- ErrorResponse DTO ---

@@ -11,7 +11,7 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "게시물 생성 요청 DTO")
-public class PostRequestDto {
+public class PostCreateRequestDto {
 
     @NotBlank(message = "제목은 필수로 입력해야 합니다.")
     @Size(max = 100, message = "제목은 100자를 초과할 수 없습니다.")

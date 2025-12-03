@@ -5,6 +5,7 @@ import com.foodcom.firstpro.domain.member.Member;
 import com.foodcom.firstpro.domain.post.Image;
 import com.foodcom.firstpro.domain.post.Post;
 import com.foodcom.firstpro.domain.post.PostResponseDto;
+import com.foodcom.firstpro.domain.post.PostUpdateRequestDto;
 import com.foodcom.firstpro.repository.MemberRepository;
 import com.foodcom.firstpro.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,13 +17,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Optional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class PostService {
 
     private final PostRepository postRepository;
@@ -83,4 +84,49 @@ public class PostService {
 
         return new PostResponseDto(post);
     }
+
+    @Transactional
+    public void updatePost(String postUuid, PostUpdateRequestDto updateDto, List<MultipartFile> newFiles, String username) throws IOException {
+
+        Post post = postRepository.findByUuid(postUuid)
+                .orElseThrow(() -> new ResourceNotFoundException("게시물을 찾을 수 없습니다."));
+
+        if (!post.getMember().getLoginId().equals(username)) {
+            throw new AccessDeniedException("작성자만 게시물을 수정할 수 있습니다.");
+        }
+
+        post.updateText(updateDto.getTitle(), updateDto.getContent());
+
+        List<Long> deleteIds = updateDto.getDeleteImageIds();
+        if (deleteIds != null && !deleteIds.isEmpty()) {
+
+            for (Long deleteId : deleteIds) {
+                post.getImages().stream()
+                        .filter(img -> img.getId().equals(deleteId))
+                        .findFirst()
+                        .ifPresent(img -> {
+                            storageService.deleteFile(img.getUrl());
+
+                            post.removeImage(deleteId);
+                        });
+            }
+        }
+
+        if (newFiles != null && !newFiles.isEmpty()) {
+            for (MultipartFile file : newFiles) {
+
+                String imageUrl = storageService.uploadFile(file, "post-images");
+
+                Image image = Image.builder()
+                        .url(imageUrl)
+                        .filename(file.getOriginalFilename())
+                        .post(post)
+                        .build();
+
+                post.addImage(image);
+            }
+        }
+    }
+
+
 }
