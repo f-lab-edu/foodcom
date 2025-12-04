@@ -1,10 +1,7 @@
 package com.foodcom.firstpro.controller;
 
 import com.foodcom.firstpro.controller.advice.GlobalExceptionHandler;
-import com.foodcom.firstpro.domain.post.Post;
-import com.foodcom.firstpro.domain.post.PostCreateRequestDto;
-import com.foodcom.firstpro.domain.post.PostResponseDto;
-import com.foodcom.firstpro.domain.post.PostUpdateRequestDto;
+import com.foodcom.firstpro.domain.post.*;
 import com.foodcom.firstpro.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,6 +15,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -278,5 +278,24 @@ public class PostController {
         postService.deletePost(postUuid, userDetails.getUsername());
 
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "게시물 목록 조회 (홈 화면)", description = "전체 게시물을 최신순으로 10개씩 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공",
+                    content = @Content(schema = @Schema(implementation = PostPageResponse.class)))
+    })
+    @GetMapping("")
+    public ResponseEntity<PostPageResponse> getPostList(
+            @Parameter(description = "페이지 번호 (1부터 시작)", example = "1")
+            @RequestParam(value = "page", defaultValue = "1") int page
+    ) {
+        int pageIndex = (page <= 0) ? 0 : page - 1;
+
+        Pageable pageable = PageRequest.of(pageIndex, 10, Sort.by(Sort.Direction.DESC, "modifiedAt"));
+
+        PostPageResponse response = postService.getPostList(pageable);
+
+        return ResponseEntity.ok(response);
     }
 }

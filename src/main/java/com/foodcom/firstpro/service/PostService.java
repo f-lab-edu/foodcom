@@ -2,14 +2,13 @@ package com.foodcom.firstpro.service;
 
 import com.foodcom.firstpro.auth.exception.ResourceNotFoundException;
 import com.foodcom.firstpro.domain.member.Member;
-import com.foodcom.firstpro.domain.post.Image;
-import com.foodcom.firstpro.domain.post.Post;
-import com.foodcom.firstpro.domain.post.PostResponseDto;
-import com.foodcom.firstpro.domain.post.PostUpdateRequestDto;
+import com.foodcom.firstpro.domain.post.*;
 import com.foodcom.firstpro.repository.MemberRepository;
 import com.foodcom.firstpro.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -17,9 +16,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.AccessDeniedException;
+import org.springframework.security.access.AccessDeniedException;
+
+import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -100,22 +101,28 @@ public class PostService {
         List<Long> deleteIds = updateDto.getDeleteImageIds();
         if (deleteIds != null && !deleteIds.isEmpty()) {
 
-            for (Long deleteId : deleteIds) {
-                post.getImages().stream()
-                        .filter(img -> img.getId().equals(deleteId))
-                        .findFirst()
-                        .ifPresent(img -> {
-                            storageService.deleteFile(img.getUrl());
+            Set<Long> deleteIdSet = new HashSet<>(updateDto.getDeleteImageIds());
 
-                            post.removeImage(deleteId);
-                        });
+            List<Image> imagesToDelete = post.getImages().stream()
+                    .filter(img -> deleteIdSet.contains(img.getId()))
+                    .toList();
+
+            for (Image img : imagesToDelete) {
+                storageService.deleteFile(img.getUrl());
             }
+            //application.properties에 spring.jpa.properties.hibernate.jdbc.batch_size=50 적용
+            post.getImages().removeAll(imagesToDelete);
         }
 
         if (newFiles != null && !newFiles.isEmpty()) {
             for (MultipartFile file : newFiles) {
+                if (file.isEmpty()) {
+                    continue;
+                }
 
-                String imageUrl = storageService.uploadFile(file, "post-images");
+                String pathPrefix = "post-images/" + post.getId();
+
+                String imageUrl = storageService.uploadFile(file, pathPrefix);
 
                 Image image = Image.builder()
                         .url(imageUrl)
@@ -129,7 +136,7 @@ public class PostService {
     }
 
 
-    public void deletePost(String postUuid, String username) throws AccessDeniedException {
+    public void deletePost(String postUuid, String username){
 
         Post post = postRepository.findByUuid(postUuid)
                 .orElseThrow(() -> new ResourceNotFoundException("게시물을 찾을 수 없습니다."));
@@ -146,5 +153,24 @@ public class PostService {
         }
 
         postRepository.delete(post);
+    }
+
+    @Transactional(readOnly = true)
+    public PostPageResponse getPostList(Pageable pageable) {
+        Page<Post> postPage = postRepository.findAllWithMemberAndImages(pageable);
+
+        List<PostListResponseDto> dtoList = postPage.getContent().stream()
+                .map(PostListResponseDto::new)
+                .toList();
+
+        return PostPageResponse.builder()
+                .postList(dtoList)
+                .totalElements(postPage.getTotalElements())
+                .totalPages(postPage.getTotalPages())
+                .size(postPage.getSize())
+                .number(postPage.getNumber() + 1)
+                .last(postPage.isLast())
+                .first(postPage.isFirst())
+                .build();
     }
 }
