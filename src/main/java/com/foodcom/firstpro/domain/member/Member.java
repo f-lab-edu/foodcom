@@ -1,22 +1,33 @@
 package com.foodcom.firstpro.domain.member;
 
+import com.foodcom.firstpro.domain.comment.Comment;
+import com.foodcom.firstpro.domain.post.Post;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "member")
-@Data
+@Getter
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String uuid;
+
     @Column(unique = true, nullable = false, length = 20)
     private String loginId;
 
-    @NotNull
+    @Column(nullable = false, length = 100)
     private String password;
 
     @NotNull
@@ -29,16 +40,44 @@ public class Member {
     @NotNull
     private Integer age;
 
-    public Member() {
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Post> posts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
+
+    public void update(MemberUpdateDto memberUpdateDto) {
+
+        if (memberUpdateDto.getNewName() != null &&
+                !this.getUsername().equals(memberUpdateDto.getNewName())) {
+            this.username = memberUpdateDto.getNewName();
+        }
+
+        // 2. 성별 수정
+        if (memberUpdateDto.getGender() != null &&
+                !this.getGender().equals(memberUpdateDto.getGender())) {
+            this.gender = memberUpdateDto.getGender();
+        }
+
+        // 3. 나이 수정
+        if (memberUpdateDto.getAge() != null &&
+                !this.getAge().equals(memberUpdateDto.getAge())) {
+            this.age = memberUpdateDto.getAge();
+        }
+    }
+
+    public void updatePassword(String encodedPassword) {
+        this.password = encodedPassword;
     }
 
     public static Member createMember(MemberJoinDTO memberJoinDTO) {
-        Member member = new Member();
-        member.setLoginId(memberJoinDTO.getLoginId());
-        member.setPassword(memberJoinDTO.getPassword());
-        member.setUsername(memberJoinDTO.getUsername());
-        member.setGender(memberJoinDTO.getGender());
-        member.setAge(memberJoinDTO.getAge());
-        return member;
+        return Member.builder()
+                .uuid(UUID.randomUUID().toString())
+                .loginId(memberJoinDTO.getLoginId())
+                .password(memberJoinDTO.getPassword())
+                .username(memberJoinDTO.getUsername())
+                .gender(memberJoinDTO.getGender())
+                .age(memberJoinDTO.getAge())
+                .build();
     }
 }
