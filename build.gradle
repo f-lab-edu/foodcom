@@ -28,6 +28,7 @@ configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
 	}
+	mockitoAgent
 }
 
 repositories {
@@ -41,7 +42,7 @@ dependencies {
 	runtimeOnly 'com.h2database:h2'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testImplementation 'org.junit.platform:junit-platform-launcher'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 
 	// JWT 라이브러리 (JJWT)
@@ -53,6 +54,7 @@ dependencies {
 
 	//SpringSecurity
 	implementation 'org.springframework.boot:spring-boot-starter-security'
+	testImplementation 'org.springframework.security:spring-security-test'
 	//QueryDSL추가
 	implementation "com.querydsl:querydsl-jpa:${queryDslVersion}:jakarta"
 	annotationProcessor "com.querydsl:querydsl-apt:${queryDslVersion}:jakarta"
@@ -73,8 +75,16 @@ dependencies {
 	clean {
 		delete file('src/main/generated')
 	}
+	mockitoAgent "net.bytebuddy:byte-buddy-agent:1.17.8"
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+	jvmArgs("-javaagent:${configurations.mockitoAgent.asPath}", '-XX:+EnableDynamicAgentLoading', '-Xshare:off')
+	testLogging {
+		events "passed", "skipped", "failed"
+		exceptionFormat "full"
+		showStandardStreams = true
+	}
+	systemProperty 'file.encoding', 'UTF-8'
 }
