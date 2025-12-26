@@ -24,71 +24,45 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class CommentController {
 
-    CommentService commentService;
+        private final CommentService commentService;
 
-    @Operation(summary = "댓글 작성", description = "특정 게시물(UUID)에 새로운 댓글을 등록합니다.")
-    @ApiResponses(value = {
-            // 201 Created
-            @ApiResponse(responseCode = "201", description = "댓글 작성 성공",
-                    content = @Content(schema = @Schema(implementation = Void.class))),
+        @Operation(summary = "댓글 작성", description = "특정 게시물(UUID)에 새로운 댓글을 등록합니다.")
+        @ApiResponses(value = {
+                        // 201 Created
+                        @ApiResponse(responseCode = "201", description = "댓글 작성 성공", content = @Content(schema = @Schema(implementation = Void.class))),
 
-            // 400 Bad Request (유효성 검사 실패)
-            @ApiResponse(responseCode = "400", description = "입력값 유효성 검사 실패 (내용 누락, 길이 초과 등)",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class),
-                            examples = @ExampleObject(
-                                    name = "유효성 검사 실패 예시",
-                                    summary = "댓글 내용이 비어있거나 제한을 넘은 경우",
-                                    value = "{\n" +
-                                            "  \"code\": \"Validation Failed\",\n" +
-                                            "  \"message\": {\n" +
-                                            "    \"content\": \"댓글 내용은 필수입니다.\"\n" +
-                                            "  }\n" +
-                                            "}"
-                            )
-                    )),
+                        // 400 Bad Request (유효성 검사 실패)
+                        @ApiResponse(responseCode = "400", description = "입력값 유효성 검사 실패 (내용 누락, 길이 초과 등)", content = @Content(mediaType = "application/json", schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class), examples = @ExampleObject(name = "유효성 검사 실패 예시", summary = "댓글 내용이 비어있거나 제한을 넘은 경우", value = "{\n"
+                                        +
+                                        "  \"code\": \"Validation Failed\",\n" +
+                                        "  \"message\": {\n" +
+                                        "    \"content\": \"댓글 내용은 필수입니다.\"\n" +
+                                        "  }\n" +
+                                        "}"))),
 
-            // 401 Unauthorized (인증 실패)
-            @ApiResponse(responseCode = "401", description = "인증 실패 (토큰 없음/만료)",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class),
-                            examples = @ExampleObject(
-                                    name = "인증 실패 예시",
-                                    value = "{\n" +
-                                            "  \"code\": \"인증 실패\",\n" +
-                                            "  \"message\": \"Access Token이 유효하지 않거나 필요합니다.\"\n" +
-                                            "}"
-                            )
-                    )),
+                        // 401 Unauthorized (인증 실패)
+                        @ApiResponse(responseCode = "401", description = "인증 실패 (토큰 없음/만료)", content = @Content(mediaType = "application/json", schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class), examples = @ExampleObject(name = "인증 실패 예시", value = "{\n"
+                                        +
+                                        "  \"code\": \"인증 실패\",\n" +
+                                        "  \"message\": \"Access Token이 유효하지 않거나 필요합니다.\"\n" +
+                                        "}"))),
 
-            // 404 Not Found (게시물 없음)
-            @ApiResponse(responseCode = "404", description = "대상 게시물을 찾을 수 없음",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class),
-                            examples = @ExampleObject(
-                                    name = "게시물 없음 예시",
-                                    value = "{\n" +
-                                            "  \"code\": \"Resource Not Found\",\n" +
-                                            "  \"message\": \"게시물을 찾을 수 없습니다.\"\n" +
-                                            "}"
-                            )
-                    ))
-    })
-    @PostMapping("/posts/{postUuid}/comments")
-    public ResponseEntity<Void> createComment(
-            @Parameter(description = "게시물 UUID", required = true)
-            @PathVariable("postUuid") String postUuid,
+                        // 404 Not Found (게시물 없음)
+                        @ApiResponse(responseCode = "404", description = "대상 게시물을 찾을 수 없음", content = @Content(mediaType = "application/json", schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class), examples = @ExampleObject(name = "게시물 없음 예시", value = "{\n"
+                                        +
+                                        "  \"code\": \"Resource Not Found\",\n" +
+                                        "  \"message\": \"게시물을 찾을 수 없습니다.\"\n" +
+                                        "}")))
+        })
+        @PostMapping("/posts/{postUuid}/comments")
+        public ResponseEntity<Void> createComment(
+                        @Parameter(description = "게시물 UUID", required = true) @PathVariable("postUuid") String postUuid,
 
-            @Valid @RequestBody CommentCreateDto commentCreateDto,
+                        @Valid @RequestBody CommentCreateDto commentCreateDto,
 
-            @Parameter(hidden = true)
-            @AuthenticationPrincipal UserDetails userDetails
-    ){
-        commentService.createComment(postUuid, commentCreateDto, userDetails.getUsername());
+                        @Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails) {
+                commentService.createComment(postUuid, commentCreateDto, userDetails.getUsername());
 
-        return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
+                return ResponseEntity.status(HttpStatus.CREATED).build();
+        }
 }

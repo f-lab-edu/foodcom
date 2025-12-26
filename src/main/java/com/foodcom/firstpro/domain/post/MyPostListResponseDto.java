@@ -8,12 +8,18 @@ import java.time.LocalDateTime;
 public class MyPostListResponseDto {
 
     private Long id;
+    private String uuid;
     private String title;
+    private String content;
     private LocalDateTime createdAt;
+    private int commentCount;
 
     public MyPostListResponseDto(Post post) {
         this.id = post.getId();
+        this.uuid = post.getUuid();
         this.title = post.getTitle();
+        this.content = post.getContent();
         this.createdAt = post.getCreatedAt();
+        this.commentCount = post.getComments().size();
     }
 }

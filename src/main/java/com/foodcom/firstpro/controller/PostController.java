@@ -274,7 +274,7 @@ public class PostController {
 
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetails userDetails
-    ) throws AccessDeniedException {
+    ){
         postService.deletePost(postUuid, userDetails.getUsername());
 
         return ResponseEntity.noContent().build();
