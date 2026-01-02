@@ -1,0 +1,64 @@
+name: Backend CI/CD (Cloud Run)
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  PROJECT_ID: foodcom-deploy
+  REGION: asia-northeast3
+  REPO_NAME: foodcom-repo
+  IMAGE_NAME: backend
+  SERVICE_NAME: foodcom-backend
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v3
+    
+    # Gradle Wrapper 실행 권한 부여
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Run Tests
+      run: ./gradlew test
+
+    - name: Google Auth
+      id: auth
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+
+    - name: Configure Docker
+      run: gcloud auth configure-docker asia-northeast3-docker.pkg.dev
+
+    - name: Build and Push Docker Image
+      run: |
+        docker buildx build --platform=linux/amd64 \
+          -t asia-northeast3-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+          -t asia-northeast3-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:latest \
+          --push .
+
+    - name: Deploy to Cloud Run
+      run: |
+        gcloud run deploy ${{ env.SERVICE_NAME }} \
+          --image asia-northeast3-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+          --region ${{ env.REGION }} \
+          --platform managed \
+          --allow-unauthenticated \
+          --set-env-vars SPRING_PROFILES_ACTIVE=prod
