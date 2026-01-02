@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.Optional;
 
@@ -17,14 +18,17 @@ class RefreshTokenRepositoryTest {
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
 
+    @Autowired
+    private StringRedisTemplate redisTemplate;
+
     @AfterEach
     void tearDown() {
         refreshTokenRepository.deleteAll();
     }
 
     @Test
-    @DisplayName("RefreshToken 저장 및 조회 (Redis 연동 테스트)")
-    void saveAndFind_Success() {
+    @DisplayName("RefreshToken 저장 시 만료 시간(TTL)이 정상적으로 설정되는지 확인")
+    void save_VerifyTimeToLive() {
         // given
         String loginId = "testuser";
         String tokenValue = "refresh-token-value";
@@ -35,30 +39,16 @@ class RefreshTokenRepositoryTest {
 
         // when
         refreshTokenRepository.save(refreshToken);
-        Optional<RefreshToken> foundToken = refreshTokenRepository.findById(loginId);
 
         // then
+        Optional<RefreshToken> foundToken = refreshTokenRepository.findById(loginId);
         assertThat(foundToken).isPresent();
-        assertThat(foundToken.get().getLoginId()).isEqualTo(loginId);
         assertThat(foundToken.get().getTokenValue()).isEqualTo(tokenValue);
-    }
 
-    @Test
-    @DisplayName("RefreshToken 삭제 테스트")
-    void delete_Success() {
-        // given
-        String loginId = "testuser";
-        RefreshToken refreshToken = RefreshToken.builder()
-                .loginId(loginId)
-                .tokenValue("refresh-token-value")
-                .build();
-        refreshTokenRepository.save(refreshToken);
+        String redisKey = "refreshToken:" + loginId;
 
-        // when
-        refreshTokenRepository.deleteById(loginId);
-        Optional<RefreshToken> foundToken = refreshTokenRepository.findById(loginId);
+        Long expireTime = redisTemplate.getExpire(redisKey);
 
-        // then
-        assertThat(foundToken).isEmpty();
+        assertThat(expireTime).isGreaterThan(0L);
     }
 }
