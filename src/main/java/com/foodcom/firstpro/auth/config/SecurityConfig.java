@@ -62,6 +62,7 @@ public class SecurityConfig {
                                 // 인증 설정
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(HttpMethod.POST, "/members").permitAll()
+                                                .requestMatchers(HttpMethod.GET, "/posts", "/posts/**").permitAll()
                                                 .requestMatchers(
                                                                 "/login",
                                                                 "/auth/reissue",
@@ -69,7 +70,8 @@ public class SecurityConfig {
                                                                 "/swagger-ui/**",
                                                                 "/v3/api-docs",
                                                                 "/v3/api-docs/**",
-                                                                "/webjars/**")
+                                                                "/webjars/**",
+                                                                "/h2-console/**")
                                                 .permitAll()
                                                 .anyRequest().authenticated())
 
