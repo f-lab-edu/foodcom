@@ -47,6 +47,10 @@ jobs:
         echo "spring.jpa.hibernate.ddl-auto=create-drop" >> ./src/main/resources/application.properties
         echo "spring.cloud.gcp.storage.credentials.location=classpath:foodcom-479117-988274ec0f1c.json" >> ./src/main/resources/application.properties
         echo "spring.cloud.gcp.storage.project-id=foodcom-deploy" >> ./src/main/resources/application.properties
+        # JWT 설정 추가 (Dummy 값)
+        echo "jwt.secret.key=dGhpcy1pcy1hLXRlc3Qtc2VjcmV0LWtleS1mb3ItYnVpbGQtdGVzdC1wdXJwb3Nlcw==" >> ./src/main/resources/application.properties
+        echo "jwt.access.expiration=3600000" >> ./src/main/resources/application.properties
+        echo "jwt.refresh.expiration=86400000" >> ./src/main/resources/application.properties
 
     - name: Run Tests
       run: ./gradlew test
