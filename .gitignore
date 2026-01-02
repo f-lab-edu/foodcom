@@ -1,1 +1,44 @@
+# --- OS 및 시스템 파일 ---
 .DS_Store
+Thumbs.db
+._*
+
+# --- IDE (IntelliJ, Eclipse, VSCode) ---
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.vscode/
+bin/
+out/
+
+# --- Gradle 빌드 파일 ---
+.gradle/
+/build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# --- 로그 파일 ---
+logs/
+*.log
+
+# --- 설정 파일 (보안 주의) ---
+# 기존 요청: 기본 설정 파일
+application.properties
+application.yml
+application.yaml
+
+# 추가 요청: 프로필별 설정 파일 (prod, local 등 모든 패턴 커버)
+application-*.properties
+application-*.yml
+application-*.yaml
+
+# --- 리소스 파일 (Secret Key 등) ---
+# 추가 요청: resources 폴더 밑의 JSON 파일 무시
+# (만약 특정 파일만 제외하고 싶다면 *.json 대신 그 파일명을 적으세요. 예: google-key.json)
+src/main/resources/*.json
+src/test/resources/*.json
+
+# --- 기타 ---
+# 테스트 커버리지 리포트 등
+jacoco.exec
