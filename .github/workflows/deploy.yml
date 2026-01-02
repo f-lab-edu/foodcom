@@ -85,10 +85,11 @@ jobs:
           --push .
 
     - name: Deploy to Cloud Run
-      run: |
-        gcloud run deploy ${{ env.SERVICE_NAME }} \
-          --image asia-northeast3-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
-          --region ${{ env.REGION }} \
-          --platform managed \
-          --allow-unauthenticated \
-          --set-env-vars SPRING_PROFILES_ACTIVE=prod
+      uses: google-github-actions/deploy-cloudrun@v2
+      with:
+        service: ${{ env.SERVICE_NAME }}
+        image: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+        region: ${{ env.REGION }}
+        project_id: ${{ env.PROJECT_ID }} # 명시적으로 프로젝트 ID 지정
+        flags: --platform managed --allow-unauthenticated
+        env_vars: SPRING_PROFILES_ACTIVE=prod
