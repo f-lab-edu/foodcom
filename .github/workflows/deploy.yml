@@ -95,5 +95,5 @@ jobs:
         image: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
         region: ${{ env.REGION }}
         project_id: ${{ env.PROJECT_ID }} # 명시적으로 프로젝트 ID 지정
-        flags: --platform managed --allow-unauthenticated --add-cloudsql-instances foodcom-deploy:asia-northeast3:foodcom-db
+        flags: --platform managed --allow-unauthenticated --add-cloudsql-instances foodcom-deploy:asia-northeast3:foodcom-db --vpc-connector foodcom-connector
         env_vars: SPRING_PROFILES_ACTIVE=prod,SPRING_CLOUD_GCP_TRACE_ENABLED=true,MANAGEMENT_TRACING_SAMPLING_PROBABILITY=1.0
