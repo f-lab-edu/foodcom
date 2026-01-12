@@ -54,7 +54,8 @@ jobs:
         echo "spring.jpa.hibernate.ddl-auto=create-drop" >> ./src/main/resources/application.properties
         # GCS 설정 (GcsConfig, StorageService에서 필요)
         echo "spring.cloud.gcp.storage.credentials.location=classpath:foodcom-479117-988274ec0f1c.json" >> ./src/main/resources/application.properties
-        echo "spring.cloud.gcp.storage.project-id=foodcom-deploy" >> ./src/main/resources/application.properties
+        echo "spring.cloud.gcp.storage.project-id=foodcom-Deploy" >> ./src/main/resources/application.properties
+        echo "spring.cloud.gcp.sql.enabled=false" >> ./src/main/resources/application.properties
         echo "gcp.storage.key-file-path=classpath:foodcom-479117-988274ec0f1c.json" >> ./src/main/resources/application.properties
         echo "gcp.storage.bucket-name=test-bucket" >> ./src/main/resources/application.properties
         # JWT 설정 추가 (Dummy 값)
