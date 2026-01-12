@@ -92,4 +92,4 @@ jobs:
         region: ${{ env.REGION }}
         project_id: ${{ env.PROJECT_ID }} # 명시적으로 프로젝트 ID 지정
         flags: --platform managed --allow-unauthenticated
-        env_vars: SPRING_PROFILES_ACTIVE=prod
+        env_vars: SPRING_PROFILES_ACTIVE=prod,SPRING_CLOUD_GCP_TRACE_ENABLED=true,MANAGEMENT_TRACING_SAMPLING_PROBABILITY=1.0
