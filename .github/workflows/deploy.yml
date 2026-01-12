@@ -96,4 +96,4 @@ jobs:
         region: ${{ env.REGION }}
         project_id: ${{ env.PROJECT_ID }} # 명시적으로 프로젝트 ID 지정
         flags: --platform managed --allow-unauthenticated --add-cloudsql-instances foodcom-deploy:asia-northeast3:foodcom-db
-        env_vars: SPRING_PROFILES_ACTIVE=prod,SPRING_CLOUD_GCP_TRACE_ENABLED=false,MANAGEMENT_TRACING_SAMPLING_PROBABILITY=1.0
+        env_vars: SPRING_PROFILES_ACTIVE=prod,SPRING_CLOUD_GCP_TRACE_ENABLED=true,MANAGEMENT_TRACING_SAMPLING_PROBABILITY=1.0
