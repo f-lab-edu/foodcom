@@ -7,8 +7,8 @@ COPY . .
 RUN ./gradlew bootJar --no-daemon
 
 # Runtime stage
-# 경량화된 Alpine Linux 기반의 JRE 21 이미지 사용
-FROM eclipse-temurin:21-jre-alpine
+# Ubuntu 기반의 JRE 21 이미지 사용 (GCP Trace/gRPC 호환성 위해 Alpine 제외)
+FROM eclipse-temurin:21-jre
 WORKDIR /app
 # 빌드 스테이지에서 생성된 JAR 파일만 복사
 COPY --from=builder /app/build/libs/*.jar app.jar

@@ -76,7 +76,9 @@ dependencies {
 
 	// Google Cloud
 	implementation platform('com.google.cloud:libraries-bom:26.5.0')
+	implementation platform('com.google.cloud:spring-cloud-gcp-dependencies:5.9.0') // Spring Cloud GCP BOM
 	implementation 'com.google.cloud:google-cloud-storage'
+	implementation 'com.google.cloud:spring-cloud-gcp-starter-trace' // Trace (APM)
 
 	// Java 21 Mockito Agent (byte-buddy)
 	mockitoAgent "net.bytebuddy:byte-buddy-agent:1.15.11" // 혹은 최신 버전
