@@ -101,5 +101,5 @@ jobs:
         image: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
         region: ${{ env.REGION }}
         project_id: "foodcom-deploy" # 모든 리소스가 있는 프로젝트로 통합
-        flags: --platform managed --allow-unauthenticated --add-cloudsql-instances foodcom-deploy:asia-northeast3:foodcom-db
-        env_vars: SPRING_PROFILES_ACTIVE=prod,SPRING_CLOUD_GCP_TRACE_ENABLED=true,MANAGEMENT_TRACING_SAMPLING_PROBABILITY=1.0,SPRING_DATA_REDIS_HOST=127.0.0.1,SPRING_DATA_REDIS_TIMEOUT=2s,SPRING_CLOUD_GCP_SQL_ENABLED=true,SPRING_CLOUD_GCP_SQL_INSTANCE_CONNECTION_NAME=foodcom-deploy:asia-northeast3:foodcom-db,SPRING_CLOUD_GCP_SQL_DATABASE_NAME=foodcom
+        flags: --platform managed --allow-unauthenticated --add-cloudsql-instances foodcom-deploy:asia-northeast3:foodcom-db --vpc-connector projects/foodcom-deploy/locations/asia-northeast3/connectors/foodcom-connector
+        env_vars: SPRING_PROFILES_ACTIVE=prod,SPRING_CLOUD_GCP_TRACE_ENABLED=true,MANAGEMENT_TRACING_SAMPLING_PROBABILITY=1.0,SPRING_CLOUD_GCP_SQL_ENABLED=true,SPRING_CLOUD_GCP_SQL_INSTANCE_CONNECTION_NAME=foodcom-deploy:asia-northeast3:foodcom-db,SPRING_CLOUD_GCP_SQL_DATABASE_NAME=foodcom,SPRING_CLOUD_GCP_PROJECT_ID=foodcom-deploy
