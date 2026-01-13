@@ -66,6 +66,12 @@ jobs:
         echo "jwt.access.expiration=3600000" >> ./src/main/resources/application.properties
         echo "jwt.refresh.expiration=86400000" >> ./src/main/resources/application.properties
 
+    - name: Create Prod Properties
+      env:
+        PROD_PROPS: ${{ secrets.APPLICATION_PROD_PROPERTIES }}
+      run: |
+        echo "$PROD_PROPS" > ./src/main/resources/application-prod.properties
+
     - name: Run Tests
       run: ./gradlew test
 
