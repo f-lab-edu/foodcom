@@ -2,7 +2,7 @@ name: Backend CI/CD (Cloud Run)
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "feature/login" ]
 
 env:
   PROJECT_ID: foodcom-deploy # 배포 및 리소스 통합 프로젝트
