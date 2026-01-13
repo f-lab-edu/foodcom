@@ -102,4 +102,4 @@ jobs:
         region: ${{ env.REGION }}
         project_id: "foodcom-deploy" # 모든 리소스가 있는 프로젝트로 통합
         flags: --platform managed --allow-unauthenticated --add-cloudsql-instances foodcom-deploy:asia-northeast3:foodcom-db --vpc-connector projects/foodcom-deploy/locations/asia-northeast3/connectors/foodcom-connector
-        env_vars: SPRING_PROFILES_ACTIVE=prod,SPRING_CLOUD_GCP_TRACE_ENABLED=true,MANAGEMENT_TRACING_SAMPLING_PROBABILITY=1.0
+        env_vars: SPRING_PROFILES_ACTIVE=prod,SPRING_CLOUD_GCP_TRACE_ENABLED=true,MANAGEMENT_TRACING_SAMPLING_PROBABILITY=1.0,SPRING_DATA_REDIS_HOST=127.0.0.1,SPRING_DATA_REDIS_TIMEOUT=2s
