@@ -5,7 +5,7 @@ on:
     branches: [ "main" ]
 
 env:
-  PROJECT_ID: flawless-star-480611-t3
+  PROJECT_ID: foodcom-deploy # 배포 및 리소스 통합 프로젝트
   REGION: asia-northeast3
   REPO_NAME: foodcom-repo
   IMAGE_NAME: backend
