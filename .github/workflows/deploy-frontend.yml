@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "main", "feature/login" ]
     paths:
-      - 'firstpro/frontend/**'
+      - 'frontend/**'
       - '.github/workflows/deploy-frontend.yml'
   workflow_dispatch:
 
@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./firstpro/frontend
+        working-directory: ./frontend
 
     steps:
     - name: Checkout code
