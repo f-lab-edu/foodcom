@@ -57,6 +57,7 @@ jobs:
         echo "spring.cloud.gcp.trace.enabled=false" >> ./src/main/resources/application.properties
         echo "spring.cloud.gcp.config.enabled=false" >> ./src/main/resources/application.properties
         echo "spring.cloud.gcp.core.enabled=false" >> ./src/main/resources/application.properties
+        echo "gcp.storage.bucket-name=test-bucket" >> ./src/main/resources/application.properties
         # JWT 설정 추가 (Dummy 값)
         echo "jwt.secret.key=dGhpcy1pcy1hLXRlc3Qtc2VjcmV0LWtleS1mb3ItYnVpbGQtdGVzdC1wdXJwb3Nlcw==" >> ./src/main/resources/application.properties
         echo "jwt.access.expiration=3600000" >> ./src/main/resources/application.properties
