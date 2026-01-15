@@ -69,6 +69,8 @@ jobs:
         echo "$PROD_PROPS" > ./src/main/resources/application-prod.properties
 
     - name: Run Tests
+      env:
+        GOOGLE_APPLICATION_CREDENTIALS: ./src/main/resources/foodcom-479117-988274ec0f1c.json
       run: ./gradlew test
 
     - name: Google Auth
