@@ -62,6 +62,8 @@ public class SecurityConfig {
                                 // 인증 설정
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(HttpMethod.POST, "/members").permitAll()
+                                                .requestMatchers("/actuator/**").permitAll() // Cloud Run Health Check
+                                                .requestMatchers(HttpMethod.GET, "/posts", "/posts/**").permitAll()
                                                 .requestMatchers(HttpMethod.GET, "/posts", "/posts/**").permitAll()
                                                 .requestMatchers(
                                                                 "/login",
