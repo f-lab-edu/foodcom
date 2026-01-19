@@ -23,7 +23,7 @@ public class StorageService {
     private String bucketName;
 
     /**
-     * @param file 클라이언트로부터 받은 이미지 파일
+     * @param file       클라이언트로부터 받은 이미지 파일
      * @param pathPrefix 버킷 내에서 파일을 분류할 경로 (예: "post-images")
      * @return 파일의 공개 URL
      */
@@ -41,9 +41,8 @@ public class StorageService {
         // GCS에 파일 업로드
         storage.create(blobInfo, file.getBytes());
 
-        // 공개 URL 반환 (GCS의 기본 공개 URL 형식)
-        // 버킷이 공개 액세스로 설정되어 있어야 정상적으로 접근 가능합니다.
-        return String.format("https://storage.googleapis.com/%s/%s", bucketName, fileName);
+        // CDN URL 반환 (Load Balancer IP 사용)
+        return String.format("http://34.149.231.113/%s", fileName);
     }
 
     public void deleteFile(String fileUrl) {
@@ -52,9 +51,14 @@ public class StorageService {
         }
 
         try {
-            String splitStr = "https://storage.googleapis.com/" + bucketName + "/";
-            if (!fileUrl.startsWith(splitStr)) {
-                log.warn("GCS URL 형식이 아닙니다: {}", fileUrl);
+            // CDN URL: http://34.149.231.113/post-images/uuid-file.jpg
+            String splitStr = "http://34.149.231.113/";
+
+            // 기존 GCS URL도 처리 가능하도록 호환성 유지 (혹시나 해서)
+            if (fileUrl.startsWith("https://storage.googleapis.com/" + bucketName + "/")) {
+                splitStr = "https://storage.googleapis.com/" + bucketName + "/";
+            } else if (!fileUrl.startsWith(splitStr)) {
+                log.warn("지원되지 않는 URL 형식입니다: {}", fileUrl);
                 return;
             }
 
