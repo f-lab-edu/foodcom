@@ -73,9 +73,15 @@ api.interceptors.response.use(
                 return api(originalRequest);
 
             } catch (refreshError) {
-                // Refresh 실패 시 토큰 삭제 후 로그인 페이지로
+                // Refresh 실패 시 토큰 삭제 및 스토어 초기화 후 로그인 페이지로
                 console.error('Refresh token expired or invalid', refreshError);
-                localStorage.removeItem('accessToken');
+
+                // [FIX] Zustand Store의 상태도 함께 초기화해야 Navbar가 바뀝니다.
+                // Circular dependency 방지를 위해 getState() 사용 가능 여부 확인 필요하지만,
+                // 여기서는 store를 직접 임포트해서 사용합니다.
+                const { logout } = (await import('../store/authStore')).useAuthStore.getState();
+                logout();
+
                 window.location.href = '/login';
                 return Promise.reject(refreshError);
             }
