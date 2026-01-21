@@ -11,29 +11,31 @@
 이 프로젝트의 가장 큰 특징은 **"실제 운영 환경(Production)을 고려한 엔지니어링"**입니다.
 단순히 기능만 구현하는 것을 넘어, 대용량 트래픽과 안정성을 위한 아키텍처를 구축했습니다.
 
-![FoodCom Architecture](assets/architecture.png)
+![FoodCom Architecture](foodcom_architecture_v2_1768966768250.png)
 
 ```mermaid
 graph TD
-    User(User) --> GLB[Global Load Balancer & Cloud CDN]
-    GLB -->|Static Assets (Cache)| Bucket[Cloud Storage (Media)]
-    GLB -->|API Requests| Run[Cloud Run (Backend Autoscale)]
+    User(User) --> GLB["Global Load Balancer & Cloud CDN"]
+    GLB -->|"Static Assets (Cache)"| Bucket["Cloud Storage (Media)"]
+    GLB -->|"API Requests"| Run["Cloud Run (Backend Autoscale)"]
     
     subgraph "Backend Infrastructure"
-        Run -->|Write (Transactional)| Master[(Cloud SQL Master - Write)]
-        Run -->|Read (Transactional readOnly)| Slave[(Cloud SQL Replica - Read)]
-        Run -->|Auth Token Storage| Redis[(Memorystore Redis)]
+        Run -->|"Write (Transactional)"| Master[("Cloud SQL Master - Write")]
+        Run -->|"Read (Transactional readOnly)"| Slave[("Cloud SQL Replica - Read")]
+        Run -->|"Auth Token Storage"| Redis[("Memorystore Redis")]
     end
     
     subgraph "CI/CD Pipeline"
-        Github[GitHub Actions] -->|Build & Test| Artifact[Artifact Registry]
+        Github[GitHub Actions] -->|"Build & Test"| Artifact[Artifact Registry]
         Artifact -->|Deploy| Run
     end
 ```
 ## 성능과 안정성 사이 고민하기
 * 최소 인스턴스 수와 최대 인스턴스 수 고민하기
+
   https://velog.io/@jhkang0516/%ED%8A%B8%EB%9E%98%ED%94%BD-%EB%8D%B0%EC%9D%B4%ED%84%B0%EB%A1%9C-%EC%A6%9D%EB%AA%85%ED%95%98%EB%8A%94-%EC%95%84%ED%82%A4%ED%85%8D%EC%B2%98-%EA%B0%9C%EC%84%A0%EA%B8%B0-%EB%82%B4-%EC%84%9C%EB%B2%84%EB%8A%94-%EC%99%9C-27%EC%B4%88-%EB%8F%99%EC%95%88-%EB%A9%88%EC%B7%84%EB%82%98
 * CDN 사용을 통한 이미지 빠르게 불러오기
+
   https://velog.io/@jhkang0516/CDN-%EC%82%AC%EC%9A%A9%EC%9D%84-%EC%9C%84%ED%95%9C-GCP-%EB%A1%9C%EB%93%9C%EB%B0%B8%EB%9F%B0%EC%84%9C-%EC%84%A4%EC%A0%95%ED%95%98%EA%B8%B0
 
 
