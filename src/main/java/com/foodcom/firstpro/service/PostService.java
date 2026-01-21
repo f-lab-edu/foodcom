@@ -36,7 +36,8 @@ public class PostService {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
             log.warn(">> [Service] 인증 실패: SecurityContext에 인증 정보 없음.");
             throw new SecurityException("인증되지 않은 사용자입니다.");
         }
@@ -45,7 +46,6 @@ public class PostService {
 
         Member member = memberRepository.findByLoginId(loginId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다. (Username: " + loginId + ")"));
-
 
         Post post = Post.builder()
                 .title(title)
@@ -87,7 +87,8 @@ public class PostService {
     }
 
     @Transactional
-    public void updatePost(String postUuid, PostUpdateRequestDto updateDto, List<MultipartFile> newFiles, String username) throws IOException {
+    public void updatePost(String postUuid, PostUpdateRequestDto updateDto, List<MultipartFile> newFiles,
+            String username) throws IOException {
 
         Post post = postRepository.findByUuid(postUuid)
                 .orElseThrow(() -> new ResourceNotFoundException("게시물을 찾을 수 없습니다."));
@@ -110,7 +111,7 @@ public class PostService {
             for (Image img : imagesToDelete) {
                 storageService.deleteFile(img.getUrl());
             }
-            //application.properties에 spring.jpa.properties.hibernate.jdbc.batch_size=50 적용
+            // application.properties에 spring.jpa.properties.hibernate.jdbc.batch_size=50 적용
             post.getImages().removeAll(imagesToDelete);
         }
 
@@ -135,8 +136,8 @@ public class PostService {
         }
     }
 
-
-    public void deletePost(String postUuid, String username){
+    @Transactional
+    public void deletePost(String postUuid, String username) {
 
         Post post = postRepository.findByUuid(postUuid)
                 .orElseThrow(() -> new ResourceNotFoundException("게시물을 찾을 수 없습니다."));
