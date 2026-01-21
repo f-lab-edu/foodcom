@@ -1,0 +1,58 @@
+name: Frontend CI/CD (Cloud Run)
+
+on:
+  push:
+    branches: [ "main", "feature/login" ]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/deploy-frontend.yml'
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: foodcom-deploy
+  REGION: asia-northeast3
+  REPO_NAME: foodcom-repo
+  IMAGE_NAME: frontend
+  SERVICE_NAME: foodcom-frontend
+  # Live Backend URL
+  BACKEND_URL: https://foodcom-backend-dfu4voiktq-du.a.run.app
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Google Auth
+      id: auth
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+
+    - name: Configure Docker
+      run: gcloud auth configure-docker asia-northeast3-docker.pkg.dev
+
+    - name: Build and Push Docker Image
+      run: |
+        docker buildx build --platform=linux/amd64 \
+          -t asia-northeast3-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+          -t asia-northeast3-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:latest \
+          --push .
+
+    - name: Deploy to Cloud Run
+      uses: google-github-actions/deploy-cloudrun@v2
+      with:
+        service: ${{ env.SERVICE_NAME }}
+        image: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+        region: ${{ env.REGION }}
+        project_id: ${{ env.PROJECT_ID }}
+        flags: --platform managed --allow-unauthenticated
+        env_vars: BACKEND_URL=${{ env.BACKEND_URL }}

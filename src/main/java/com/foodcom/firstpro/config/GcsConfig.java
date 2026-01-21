@@ -16,23 +16,29 @@ import java.io.InputStream;
 @Configuration
 public class GcsConfig {
 
-    @Value("${gcp.storage.key-file-path}")
+    @Value("${gcp.storage.key-file-path:#{null}}")
     private String keyFilePath;
 
     @Bean
     public Storage storage() throws IOException {
-        InputStream inputStream;
-        System.out.println("Initializing GCS Storage. Key path: " + keyFilePath);
+        Credentials credentials;
 
-        // classpath: 접두사 처리 (Docker/Cloud Run 환경용)
-        if (keyFilePath.startsWith("classpath:")) {
-            String path = keyFilePath.substring("classpath:".length());
-            inputStream = new ClassPathResource(path).getInputStream();
+        if (keyFilePath != null && !keyFilePath.isEmpty()) {
+            InputStream inputStream;
+            System.out.println("Initializing GCS Storage using Key File: " + keyFilePath);
+
+            // classpath: 접두사 처리 (Docker/Cloud Run 환경용)
+            if (keyFilePath.startsWith("classpath:")) {
+                String path = keyFilePath.substring("classpath:".length());
+                inputStream = new ClassPathResource(path).getInputStream();
+            } else {
+                inputStream = new FileInputStream(keyFilePath);
+            }
+            credentials = GoogleCredentials.fromStream(inputStream);
         } else {
-            inputStream = new FileInputStream(keyFilePath);
+            System.out.println("Initializing GCS Storage using Application Default Credentials (ADC)");
+            credentials = GoogleCredentials.getApplicationDefault();
         }
-
-        Credentials credentials = GoogleCredentials.fromStream(inputStream);
 
         return StorageOptions.newBuilder()
                 .setCredentials(credentials)
