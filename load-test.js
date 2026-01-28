@@ -22,8 +22,8 @@ export default function () {
 
     if (isWrite) {
         // === Write Scenario: 회원가입 (Master DB) ===
-        // 매번 새로운 유저 ID 생성 (충돌 방지)
-        const uniqueId = `loadtest_${__VU}_${__ITER}_${Date.now()}`;
+        // 매번 새로운 유저 ID 생성 (충돌 방지, Base36 사용으로 길이 단축)
+        const uniqueId = `L${__VU}${__ITER}${Date.now().toString(36)}`; // L50999l4y6abcd (약 15-18자)
 
         const payload = JSON.stringify({
             loginId: uniqueId.substring(0, 20), // 20자 제한 맞춤
@@ -41,6 +41,11 @@ export default function () {
         };
 
         let res = http.post(`${BASE_URL}/members`, payload, params);
+
+        // 추가: 에러 트래킹
+        if (res.status !== 201) {
+            console.error(`Signup Failed! Status: ${res.status} Body: ${res.body}`);
+        }
 
         check(res, {
             'Signup status is 201': (r) => r.status === 201,
