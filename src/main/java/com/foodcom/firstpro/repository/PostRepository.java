@@ -18,19 +18,20 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     Optional<Post> findByUuid(String uuid);
 
-    @Query("""
-    SELECT new com.foodcom.firstpro.domain.post.PostListResponseDto(
-        p.uuid,
-        p.title,
-        m.username,
-        p.thumbnailUrl,
-        p.createdAt,
-        p.modifiedAt,
-        p.commentCount
-    )
-    FROM Post p
-    JOIN p.member m
-""")
+    @Query(value = """
+                SELECT new com.foodcom.firstpro.domain.post.PostListResponseDto(
+                    p.uuid,
+                    p.title,
+                    m.username,
+                    p.thumbnailUrl,
+                    p.createdAt,
+                    p.modifiedAt,
+                    p.commentCount
+                )
+                FROM Post p
+                JOIN p.member m
+                ORDER BY p.modifiedAt DESC
+            """, countQuery = "SELECT COUNT(p) FROM Post p")
     Page<PostListResponseDto> findPostList(Pageable pageable);
 
     @Modifying

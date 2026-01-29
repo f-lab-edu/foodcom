@@ -75,6 +75,7 @@ public class PostService {
             }
         }
 
+        post.updateThumbnail();
         return post;
     }
 
