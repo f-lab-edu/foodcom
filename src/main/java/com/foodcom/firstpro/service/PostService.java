@@ -135,6 +135,8 @@ public class PostService {
                 post.addImage(image);
             }
         }
+
+        post.updateThumbnail();
     }
 
     @Transactional
