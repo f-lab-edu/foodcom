@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
+@Table(indexes = {
+        @Index(name = "idx_image_post_id", columnList = "post_id")
+})
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Image {
