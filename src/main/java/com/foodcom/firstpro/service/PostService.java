@@ -158,14 +158,10 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public PostPageResponse getPostList(Pageable pageable) {
-        Page<Post> postPage = postRepository.findAllWithMemberAndImages(pageable);
-
-        List<PostListResponseDto> dtoList = postPage.getContent().stream()
-                .map(PostListResponseDto::new)
-                .toList();
+        Page<PostListResponseDto> postPage = postRepository.findPostList(pageable);
 
         return PostPageResponse.builder()
-                .postList(dtoList)
+                .postList(postPage.getContent())
                 .totalElements(postPage.getTotalElements())
                 .totalPages(postPage.getTotalPages())
                 .size(postPage.getSize())

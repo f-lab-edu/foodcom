@@ -30,16 +30,14 @@ public class PostListResponseDto {
     @Schema(description = "댓글 개수", example = "12")
     private final int commentCount;
 
-    public PostListResponseDto(Post post) {
-        this.uuid = post.getUuid();
-        this.title = post.getTitle();
-        this.writer = post.getMember().getUsername();
-        this.createdAt = post.getCreatedAt();
-        this.modifiedAt = post.getModifiedAt();
-        this.commentCount = post.getComments().size();
-
-        this.thumbnailUrl = post.getImages().isEmpty()
-                ? null
-                : post.getImages().getFirst().getUrl();
+    public PostListResponseDto(String uuid, String title, String writer, String thumbnailUrl, LocalDateTime createdAt, LocalDateTime modifiedAt, int commentCount
+    ) {
+        this.uuid = uuid;
+        this.title = title;
+        this.writer = writer;
+        this.thumbnailUrl = thumbnailUrl;
+        this.createdAt = createdAt;
+        this.modifiedAt = modifiedAt;
+        this.commentCount = commentCount;
     }
 }

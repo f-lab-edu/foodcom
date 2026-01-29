@@ -64,6 +64,25 @@ public class Post {
         }
     }
 
+    @Column(nullable = false)
+    @Builder.Default
+    private int commentCount = 0;
+
+    @Column
+    private String thumbnailUrl;
+
+    public void increaseCommentCount() {
+        this.commentCount++;
+    }
+
+    public void updateThumbnail() {
+        if (this.images != null && !this.images.isEmpty()) {
+            this.thumbnailUrl = this.images.get(0).getUrl();
+        } else {
+            this.thumbnailUrl = null;
+        }
+    }
+
     public void updateText(String title, String content) {
         if (title != null && !title.isBlank()) {
             this.title = title;
