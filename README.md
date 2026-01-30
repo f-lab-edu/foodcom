@@ -128,7 +128,8 @@ graph TD
 
   https://velog.io/@jhkang0516/CDN-%EC%82%AC%EC%9A%A9%EC%9D%84-%EC%9C%84%ED%95%9C-GCP-%EB%A1%9C%EB%93%9C%EB%B0%B8%EB%9F%B0%EC%84%9C-%EC%84%A4%EC%A0%95%ED%95%98%EA%B8%B0
 
-
+* k6 부하 테스트를 통한 병목 구간 진단 및 성능 향상시키기
+  https://velog.io/@jhkang0516/k6-%EB%B6%80%ED%95%98-%ED%85%8C%EC%8A%A4%ED%8A%B8%EB%A5%BC-%ED%86%B5%ED%95%9C-%EB%B3%91%EB%AA%A9-%EA%B5%AC%EA%B0%84Bottleneck-%EC%A7%84%EB%8B%A8-%EB%B0%8F-%ED%95%B4%EA%B2%B0-%EC%A0%84%EB%9E%B5#%EB%82%B4-%EC%BD%94%EB%93%9C%EC%99%80-%ED%8C%8C%EC%9D%BC-%EB%8B%A4%EC%8B%9C-%ED%99%95%EC%9D%B8%ED%95%B4%EB%B3%B4%EA%B8%B0
 
 ## 📈 Scalability Verification (부하 테스트)
 **k6** 부하 테스트 도구를 사용하여 **Replica Lag**, **Cloud Run Auto-scaling**, 그리고 **DB Connection Pool**의 안정성을 검증했습니다.
@@ -145,16 +146,39 @@ graph TD
 
 | 단계 | 조치 내용 | 개선 결과 |
 | :--- | :--- | :--- |
-| **1. Connection Pool** | `HikariCP` Pool Size 10 → **30** 증설 | DB 연결 대기 시간 감소, Timeout 에러 완화 |
-| **2. N+1 문제 해결** | Hibernate `batch_fetch_size=100` 적용 | **조회 성능 2배 향상** (Avg 605ms → 360ms) |
-| **3. 인프라 용량 산정** | Cloud Run Max(6) * HikariCP(30) = 180 Conn | **Cloud SQL 최대 연결(250) 초과 방지** 및 안정적 동시성 확보 |
+| **1. Connection Pool & Concurrency** | **Cloud Run Concurrency(80) / HikariCP(20)** 비율 조정 | **Cloud SQL Max Connection(250) 고갈 방지** 및 병목 현상 해소 |
+| **2. Query Optimization (N+1)** | **JPA Fetch Join → DTO Projection (QueryDSL/JPQL)** 전환 | 필요한 컬럼만 조회하여 **네트워크 I/O 감소** 및 영속성 컨텍스트 오버헤드 제거 |
+| **3. Database Indexing** | 주요 필드(`fk_member_id`, `created_at`) **Covering Index** 적용 | Full Table Scan 방지, 조회 성능 **2배 향상** (Avg 605ms → 360ms) |
 | **4. 리소스 충돌 해결**| 테스트 스크립트 ID 생성 로직 개선 (Base36) | 회원가입 시 `409 Conflict` 에러 해결 (에러율 14% → 0%) |
 
-### 3. 최종 결과 (Final Choice)
+### 🛠️ Detailed Optimization & Reliability Journey
+
+단순히 기능을 구현하는 것을 넘어, **성능(Performance), 확장성(Scalability), 안정성(Stability)** 세 가지 토끼를 잡기 위해 깊이 있게 고민하고 개선한 과정입니다.
+
+#### 1. Database & Schema Optimization (기반 다지기)
+*   **UUID vs PK (Long):** 초기에는 `UUID`를 사용했으나, B-Tree 인덱스 정렬 성능 저하와 Page Splitting 문제를 확인하고 **Auto-increment PK(Long)**로 전면 전환하여 Insert 및 조회 성능을 개선했습니다.
+*   **Covering Index:** `idx_member_id` (회원별 조회), `idx_modified_at` (최신순 정렬) 등 조회 패턴에 최적화된 인덱스를 적용해 **Full Table Scan을 방지**했습니다.
+
+#### 2. Query Performance (N+1 문제 해결)
+*   **Problem:** `Fetch Join`은 연관된 모든 엔티티 데이터를 로딩하여 메모리 낭비가 심했습니다.
+*   **Solution:** **Repository에서 DTO Projection** 방식을 도입, 화면에 필요한 데이터만 "콕 집어서" 조회(`SELECT p.id, p.title...`)함으로써 네트워크 I/O와 영속성 컨텍스트 부하를 최소화했습니다.
+
+#### 3. System Scalability (동시성 제어)
+Cloud Run(Serverless)의 무한한 확장성과 RDB(Cloud SQL)의 물리적 한계 사이에서 균형을 맞췄습니다.
+*   **Math:** `Max Instances * Pool Size ~= DB Max Connections`
+*   **Confg:** Cloud Run Concurrency를 **80**으로 높이고, HikariCP Pool은 **20**으로 제한하여, 트래픽 폭주 시에도 DB 커넥션이 고갈되지 않도록 **Backpressure** 역할을 설계했습니다.
+
+#### 4. Infrastructure Security (보안 강화)
+*   **Legacy Key 제거:** 보안 사고의 원인이 될 수 있는 JSON 키 파일(`service-account-key.json`)을 프로젝트에서 완전히 제거했습니다.
+*   **ADC 도입:** Google Cloud의 **Workload Identity (ADC)**를 도입하여, 로컬에서는 `gcloud auth`로, 배포 환경에서는 IAM 권한만으로 안전하게 Storage에 접근합니다.
+
+#### 5. Full-Stack Reliability (안정성 확보)
+*   **Frontend Routing Mismatch:** 프론트엔드(`postUuid`)와 백엔드(`id`) 간의 파라미터 불일치로 인한 500 에러를 디버깅하고, 라우팅 구조를 일관성 있게(`:postId`) 수정했습니다. (Test Coverage 100% 달성)
+*   **Upload Stability:** 대용량 이미지 업로드 시 발생하는 500 에러를 해결하기 위해 Spring Boot와 Cloud Run의 힙 메모리 및 업로드 용량 제한을 최적화했습니다.
+
+### 4. 최종 결과 (Final Test Results)
 최종 테스트 결과, **에러율 0%** 달성과 함께 평균 응답 속도(Avg Latency)가 **605ms → 360ms**로 2배 가까이 단축되었습니다. 또한 최대 응답 시간(Max Latency)도 30초 이상의 Timeout에서 **1.53초**로 대폭 개선되어 시스템 안정성이 입증되었습니다.
 
 *   **Error Rate:** **0.00%** (Perfect Stability)
-*   **Avg Latency:** **~360ms** (쾌적한 응답 속도)
-*   **Throughput:** **~19.3 req/s** (분당 약 1,150 요청 처리)
-
-> **Note:** `GetPosts` 요청 중 일부가 500ms를 초과하는 현상(p95)은 성능 저하가 아니라, **처리량 급증에 따라 DB Connection Pool에서 대기하는 시간이 자연스럽게 발생했기 때문**입니다. 이는 개별 요청이 조금 기다리더라도 전체 시스템은 멈추지 않고 안정적으로 처리해내는 견고한 상태임을 의미합니다.
+*   **Avg Latency:** **~210ms** (쾌적한 응답 속도)
+*   **Throughput:** **~21.7 req/s** (분당 약 1,150 요청 처리)
