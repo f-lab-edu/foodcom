@@ -22,8 +22,8 @@ public class CommentService {
         private final MemberRepository memberRepository;
         private final CommentRepository commentRepository;
 
-        public void createComment(String postUuid, CommentCreateDto commentCreateDto, String loginId) {
-                Post post = postRepository.findByUuid(postUuid)
+        public void createComment(Long postId, CommentCreateDto commentCreateDto, String loginId) {
+                Post post = postRepository.findById(postId)
                                 .orElseThrow(() -> new ResourceNotFoundException("게시물을 찾을 수 없습니다."));
 
                 Member member = memberRepository.findByLoginId(loginId)

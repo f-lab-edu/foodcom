@@ -80,18 +80,18 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public PostResponseDto getPostInfo(String postUuid) {
-        Post post = postRepository.findByUuid(postUuid)
-                .orElseThrow(() -> new ResourceNotFoundException("게시물을 찾을 수 없습니다. Uuid = " + postUuid));
+    public PostResponseDto getPostInfo(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("게시물을 찾을 수 없습니다. ID = " + postId));
 
         return new PostResponseDto(post);
     }
 
     @Transactional
-    public void updatePost(String postUuid, PostUpdateRequestDto updateDto, List<MultipartFile> newFiles,
+    public void updatePost(Long postId, PostUpdateRequestDto updateDto, List<MultipartFile> newFiles,
             String username) throws IOException {
 
-        Post post = postRepository.findByUuid(postUuid)
+        Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("게시물을 찾을 수 없습니다."));
 
         if (!post.getMember().getLoginId().equals(username)) {
@@ -140,9 +140,8 @@ public class PostService {
     }
 
     @Transactional
-    public void deletePost(String postUuid, String username) {
-
-        Post post = postRepository.findByUuid(postUuid)
+    public void deletePost(Long postId, String username) {
+        Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("게시물을 찾을 수 없습니다."));
 
         if (!post.getMember().getLoginId().equals(username)) {

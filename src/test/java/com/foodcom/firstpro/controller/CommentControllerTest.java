@@ -78,7 +78,7 @@ public class CommentControllerTest {
         String jsonRequest = "{\"content\":\"" + content + "\"}";
 
         // when & then
-        mockMvc.perform(post("/posts/{postUuid}/comments", testPost.getUuid())
+        mockMvc.perform(post("/posts/{postId}/comments", testPost.getId())
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonRequest))

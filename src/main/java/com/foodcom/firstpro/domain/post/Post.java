@@ -11,13 +11,11 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Getter
 @Table(indexes = {
         @Index(name = "idx_member_id", columnList = "member_id"),
-        @Index(name = "idx_post_uuid", columnList = "uuid"),
         @Index(name = "idx_modified_at", columnList = "modifiedAt")
 })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -29,10 +27,6 @@ public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable = false, unique = true, updatable = false)
-    @Builder.Default
-    String uuid = UUID.randomUUID().toString();
 
     @Column(nullable = false, length = 100)
     private String title;

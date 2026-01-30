@@ -10,17 +10,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
-import java.util.Optional;
-
 public interface PostRepository extends JpaRepository<Post, Long> {
 
     Page<Post> findByMember(Member member, Pageable pageable);
 
-    Optional<Post> findByUuid(String uuid);
-
     @Query(value = """
                 SELECT new com.foodcom.firstpro.domain.post.PostListResponseDto(
-                    p.uuid,
+                    p.id,
                     p.title,
                     m.username,
                     p.thumbnailUrl,
