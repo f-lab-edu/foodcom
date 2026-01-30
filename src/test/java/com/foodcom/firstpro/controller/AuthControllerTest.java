@@ -42,13 +42,16 @@ public class AuthControllerTest {
         @MockitoBean
         private RefreshTokenRepository refreshTokenRepository;
 
+        @MockitoBean
+        private com.google.cloud.storage.Storage storage;
+
         @Test
         @DisplayName("토큰 재발급 성공 테스트")
         public void reissueAccessToken_Success() throws Exception {
                 // given
                 String loginId = "testuser";
                 Authentication authentication = new UsernamePasswordAuthenticationToken(loginId, "",
-                        Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
+                                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
 
                 // 유효한 리프레시 토큰 생성
                 TokenInfo tokenInfo = jwtTokenProvider.generateToken(authentication);
