@@ -41,6 +41,7 @@ jobs:
 
     - name: Create Test Properties
       run: |
+        mkdir -p ./src/main/resources
         # Master DataSource for H2
         echo "spring.datasource.master.jdbc-url=jdbc:h2:mem:testdb" > ./src/main/resources/application.properties
         echo "spring.datasource.master.driver-class-name=org.h2.Driver" >> ./src/main/resources/application.properties
