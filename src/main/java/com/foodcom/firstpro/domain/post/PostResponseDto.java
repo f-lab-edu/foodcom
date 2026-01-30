@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 public class PostResponseDto {
 
-    private String uuid;
+    private Long id;
     private String title;
     private String content;
     private String userName;
@@ -22,7 +22,7 @@ public class PostResponseDto {
     private List<CommentResponseDto> comments;
 
     public PostResponseDto(Post post) {
-        this.uuid = post.getUuid();
+        this.id = post.getId();
         this.title = post.getTitle();
         this.content = post.getContent();
         this.userName = post.getMember().getUsername();

@@ -7,8 +7,8 @@ import { Image as ImageIcon, X } from 'lucide-react';
 
 export const CreatePost = () => {
     const navigate = useNavigate();
-    const { postUuid } = useParams<{ postUuid: string }>(); // Optional param for edit mode
-    const isEditMode = !!postUuid;
+    const { postId } = useParams<{ postId: string }>(); // Optional param for edit mode
+    const isEditMode = !!postId;
 
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
@@ -23,7 +23,7 @@ export const CreatePost = () => {
         if (isEditMode) {
             const loadPost = async () => {
                 try {
-                    const data = await postApi.getPost(postUuid);
+                    const data = await postApi.getPost(postId);
                     setTitle(data.title);
                     setContent(data.content);
                     // Note: Handling existing images for update is complex if backend doesn't support keeping old ones easily with FormData.
@@ -37,7 +37,7 @@ export const CreatePost = () => {
             };
             loadPost();
         }
-    }, [isEditMode, postUuid]);
+    }, [isEditMode, postId]);
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
@@ -68,8 +68,8 @@ export const CreatePost = () => {
 
         try {
             if (isEditMode) {
-                await postApi.updatePost(postUuid, { title, content, files: images });
-                navigate(`/posts/${postUuid}`);
+                await postApi.updatePost(postId, { title, content, files: images });
+                navigate(`/posts/${postId}`);
             } else {
                 await postApi.createPost({ title, content, files: images });
                 navigate('/');

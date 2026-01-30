@@ -75,22 +75,23 @@ public class PostService {
             }
         }
 
+        post.updateThumbnail();
         return post;
     }
 
     @Transactional(readOnly = true)
-    public PostResponseDto getPostInfo(String postUuid) {
-        Post post = postRepository.findByUuid(postUuid)
-                .orElseThrow(() -> new ResourceNotFoundException("게시물을 찾을 수 없습니다. Uuid = " + postUuid));
+    public PostResponseDto getPostInfo(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("게시물을 찾을 수 없습니다. ID = " + postId));
 
         return new PostResponseDto(post);
     }
 
     @Transactional
-    public void updatePost(String postUuid, PostUpdateRequestDto updateDto, List<MultipartFile> newFiles,
+    public void updatePost(Long postId, PostUpdateRequestDto updateDto, List<MultipartFile> newFiles,
             String username) throws IOException {
 
-        Post post = postRepository.findByUuid(postUuid)
+        Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("게시물을 찾을 수 없습니다."));
 
         if (!post.getMember().getLoginId().equals(username)) {
@@ -134,12 +135,13 @@ public class PostService {
                 post.addImage(image);
             }
         }
+
+        post.updateThumbnail();
     }
 
     @Transactional
-    public void deletePost(String postUuid, String username) {
-
-        Post post = postRepository.findByUuid(postUuid)
+    public void deletePost(Long postId, String username) {
+        Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("게시물을 찾을 수 없습니다."));
 
         if (!post.getMember().getLoginId().equals(username)) {
@@ -158,14 +160,10 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public PostPageResponse getPostList(Pageable pageable) {
-        Page<Post> postPage = postRepository.findAllWithMemberAndImages(pageable);
-
-        List<PostListResponseDto> dtoList = postPage.getContent().stream()
-                .map(PostListResponseDto::new)
-                .toList();
+        Page<PostListResponseDto> postPage = postRepository.findPostList(pageable);
 
         return PostPageResponse.builder()
-                .postList(dtoList)
+                .postList(postPage.getContent())
                 .totalElements(postPage.getTotalElements())
                 .totalPages(postPage.getTotalPages())
                 .size(postPage.getSize())

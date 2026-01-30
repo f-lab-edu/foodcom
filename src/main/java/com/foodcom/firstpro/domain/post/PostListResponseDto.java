@@ -9,8 +9,8 @@ import java.time.LocalDateTime;
 @Schema(description = "게시물 목록 요약 정보 DTO (홈 화면용)")
 public class PostListResponseDto {
 
-    @Schema(description = "게시물 고유 UUID", example = "550e8400-e29b-41d4-a716-446655440000")
-    private final String uuid;
+    @Schema(description = "게시물 ID (PK)", example = "1")
+    private final Long id;
 
     @Schema(description = "게시물 제목", example = "오늘 점심 메뉴 추천합니다!")
     private final String title;
@@ -30,16 +30,14 @@ public class PostListResponseDto {
     @Schema(description = "댓글 개수", example = "12")
     private final int commentCount;
 
-    public PostListResponseDto(Post post) {
-        this.uuid = post.getUuid();
-        this.title = post.getTitle();
-        this.writer = post.getMember().getUsername();
-        this.createdAt = post.getCreatedAt();
-        this.modifiedAt = post.getModifiedAt();
-        this.commentCount = post.getComments().size();
-
-        this.thumbnailUrl = post.getImages().isEmpty()
-                ? null
-                : post.getImages().getFirst().getUrl();
+    public PostListResponseDto(Long id, String title, String writer, String thumbnailUrl, LocalDateTime createdAt,
+            LocalDateTime modifiedAt, int commentCount) {
+        this.id = id;
+        this.title = title;
+        this.writer = writer;
+        this.thumbnailUrl = thumbnailUrl;
+        this.createdAt = createdAt;
+        this.modifiedAt = modifiedAt;
+        this.commentCount = commentCount;
     }
 }

@@ -38,13 +38,10 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    - name: Create GCP Key File
-      run: |
-        mkdir -p ./src/main/resources
-        echo '${{ secrets.GCP_SA_KEY }}' > ./src/main/resources/foodcom-479117-988274ec0f1c.json
 
     - name: Create Test Properties
       run: |
+        mkdir -p ./src/main/resources
         # Master DataSource for H2
         echo "spring.datasource.master.jdbc-url=jdbc:h2:mem:testdb" > ./src/main/resources/application.properties
         echo "spring.datasource.master.driver-class-name=org.h2.Driver" >> ./src/main/resources/application.properties
@@ -82,8 +79,6 @@ jobs:
         echo "$PROD_PROPS" > ./src/main/resources/application-prod.properties
 
     - name: Run Tests
-      env:
-        GOOGLE_APPLICATION_CREDENTIALS: ./src/main/resources/foodcom-479117-988274ec0f1c.json
       run: ./gradlew test
 
     - name: Google Auth
@@ -112,5 +107,5 @@ jobs:
         image: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
         region: ${{ env.REGION }}
         project_id: "foodcom-deploy" # 모든 리소스가 있는 프로젝트로 통합
-        flags: --platform managed --allow-unauthenticated --add-cloudsql-instances foodcom-deploy:asia-northeast3:foodcom-db --vpc-connector projects/foodcom-deploy/locations/asia-northeast3/connectors/foodcom-connector --memory 1Gi --startup-probe=httpGet.path=/actuator/health/readiness,initialDelaySeconds=10,periodSeconds=10,failureThreshold=30
-        env_vars: SPRING_PROFILES_ACTIVE=prod,MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED=true,SPRING_CLOUD_GCP_TRACE_ENABLED=true,MANAGEMENT_TRACING_SAMPLING_PROBABILITY=1.0,SPRING_DATASOURCE_URL=${{ secrets.DB_URL }},SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USERNAME }},SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }},SPRING_CLOUD_GCP_SQL_ENABLED=false,CORS_ALLOWED_ORIGINS=https://foodcom-frontend-dfu4voiktq-du.a.run.app,http://localhost:5173,SPRING_DATA_REDIS_HOST=${{ secrets.REDIS_HOST }},SPRING_DATA_REDIS_PORT=${{ secrets.REDIS_PORT }},GCP_STORAGE_BUCKET_NAME=${{ secrets.GCP_STORAGE_BUCKET_NAME }},SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE=10MB,SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE=50MB
+        flags: --platform managed --min-instances 1 --max-instances 10 --concurrency 20 --allow-unauthenticated --add-cloudsql-instances foodcom-deploy:asia-northeast3:foodcom-db --vpc-connector projects/foodcom-deploy/locations/asia-northeast3/connectors/foodcom-connector --memory 1Gi --startup-probe=httpGet.path=/actuator/health/readiness,initialDelaySeconds=10,periodSeconds=10,failureThreshold=30
+        env_vars: SPRING_PROFILES_ACTIVE=prod,MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED=true,SPRING_CLOUD_GCP_TRACE_ENABLED=true,MANAGEMENT_TRACING_SAMPLING_PROBABILITY=0.1,SPRING_DATASOURCE_URL=${{ secrets.DB_URL }},SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USERNAME }},SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }},SPRING_CLOUD_GCP_SQL_ENABLED=false,CORS_ALLOWED_ORIGINS=https://foodcom-frontend-dfu4voiktq-du.a.run.app,http://localhost:5173,SPRING_DATA_REDIS_HOST=${{ secrets.REDIS_HOST }},SPRING_DATA_REDIS_PORT=${{ secrets.REDIS_PORT }},GCP_STORAGE_BUCKET_NAME=${{ secrets.GCP_STORAGE_BUCKET_NAME }},SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE=10MB,SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE=50MB

@@ -54,14 +54,14 @@ public class CommentController {
                                         "  \"message\": \"게시물을 찾을 수 없습니다.\"\n" +
                                         "}")))
         })
-        @PostMapping("/posts/{postUuid}/comments")
+        @PostMapping("/posts/{postId}/comments")
         public ResponseEntity<Void> createComment(
-                        @Parameter(description = "게시물 UUID", required = true) @PathVariable("postUuid") String postUuid,
+                        @Parameter(description = "게시물 ID", required = true) @PathVariable("postId") Long postId,
 
                         @Valid @RequestBody CommentCreateDto commentCreateDto,
 
                         @Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails) {
-                commentService.createComment(postUuid, commentCreateDto, userDetails.getUsername());
+                commentService.createComment(postId, commentCreateDto, userDetails.getUsername());
 
                 return ResponseEntity.status(HttpStatus.CREATED).build();
         }

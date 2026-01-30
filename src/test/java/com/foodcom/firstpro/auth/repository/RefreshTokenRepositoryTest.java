@@ -1,12 +1,14 @@
 package com.foodcom.firstpro.auth.repository;
 
 import com.foodcom.firstpro.auth.domain.RefreshToken;
+import com.google.cloud.storage.Storage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.Optional;
 
@@ -14,6 +16,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 class RefreshTokenRepositoryTest {
+
+    @MockitoBean
+    private Storage storage;
 
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
