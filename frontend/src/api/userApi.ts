@@ -2,7 +2,7 @@ import api from './axios';
 
 // Based on MyPostListResponseDto.java
 export interface MyPostListResponse {
-    uuid: string;
+    id: number;
     title: string;
     content: string;
     createdAt: string;

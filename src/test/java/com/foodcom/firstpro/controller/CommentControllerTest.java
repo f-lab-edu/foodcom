@@ -20,7 +20,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import com.foodcom.firstpro.domain.member.Gender;
-import java.util.UUID;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -57,7 +56,7 @@ public class CommentControllerTest {
                 .username("Test User")
                 .age(25)
                 .gender(Gender.MALE)
-                .uuid(UUID.randomUUID().toString())
+
                 .build();
         memberRepository.save(testMember);
 

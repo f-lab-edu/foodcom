@@ -17,8 +17,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -80,7 +78,7 @@ public class LoginControllerTest {
                                 .username("Login User")
                                 .age(30)
                                 .gender(Gender.MALE)
-                                .uuid(UUID.randomUUID().toString())
+
                                 .build();
                 memberRepository.save(member);
 
@@ -112,7 +110,6 @@ public class LoginControllerTest {
                                 .username("Existing User")
                                 .age(20)
                                 .gender(Gender.FEMALE)
-                                .uuid(UUID.randomUUID().toString())
                                 .build();
                 memberRepository.save(existingMember);
 
@@ -140,7 +137,6 @@ public class LoginControllerTest {
                                 .username("Login User")
                                 .age(30)
                                 .gender(Gender.MALE)
-                                .uuid(UUID.randomUUID().toString())
                                 .build();
                 memberRepository.save(member);
 

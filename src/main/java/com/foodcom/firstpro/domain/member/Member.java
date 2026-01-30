@@ -8,7 +8,6 @@ import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Table(name = "member", indexes = {
@@ -23,8 +22,6 @@ public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    private String uuid;
 
     @Column(unique = true, nullable = false, length = 20)
     private String loginId;
@@ -74,7 +71,6 @@ public class Member {
 
     public static Member createMember(MemberJoinDTO memberJoinDTO) {
         return Member.builder()
-                .uuid(UUID.randomUUID().toString())
                 .loginId(memberJoinDTO.getLoginId())
                 .password(memberJoinDTO.getPassword())
                 .username(memberJoinDTO.getUsername())

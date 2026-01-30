@@ -22,7 +22,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
-import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -62,7 +61,7 @@ public class PostControllerTest {
                                 .username("Test User")
                                 .age(25)
                                 .gender(Gender.MALE)
-                                .uuid(UUID.randomUUID().toString())
+
                                 .build();
                 memberRepository.save(testMember);
         }
