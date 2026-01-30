@@ -38,10 +38,6 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    - name: Create GCP Key File
-      run: |
-        mkdir -p ./src/main/resources
-        echo '${{ secrets.GCP_SA_KEY }}' > ./src/main/resources/foodcom-479117-988274ec0f1c.json
 
     - name: Create Test Properties
       run: |
@@ -82,8 +78,6 @@ jobs:
         echo "$PROD_PROPS" > ./src/main/resources/application-prod.properties
 
     - name: Run Tests
-      env:
-        GOOGLE_APPLICATION_CREDENTIALS: ./src/main/resources/foodcom-479117-988274ec0f1c.json
       run: ./gradlew test
 
     - name: Google Auth
