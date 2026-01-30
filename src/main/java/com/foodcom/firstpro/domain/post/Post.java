@@ -17,7 +17,8 @@ import java.util.UUID;
 @Getter
 @Table(indexes = {
         @Index(name = "idx_member_id", columnList = "member_id"),
-        @Index(name = "idx_post_uuid", columnList = "uuid")
+        @Index(name = "idx_post_uuid", columnList = "uuid"),
+        @Index(name = "idx_modified_at", columnList = "modifiedAt")
 })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
