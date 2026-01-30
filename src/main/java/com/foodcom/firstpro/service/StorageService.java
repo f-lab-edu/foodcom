@@ -42,7 +42,7 @@ public class StorageService {
         storage.create(blobInfo, file.getBytes());
 
         // CDN URL 반환 (Load Balancer IP 사용)
-        return String.format("http://34.49.218.153/%s", fileName);
+        return String.format("https://34.49.218.153/%s", fileName);
     }
 
     public void deleteFile(String fileUrl) {
@@ -51,12 +51,15 @@ public class StorageService {
         }
 
         try {
-            // CDN URL: http://34.49.218.153/post-images/uuid-file.jpg
-            String splitStr = "http://34.49.218.153/";
+            // CDN URL: https://34.49.218.153/post-images/uuid-file.jpg
+            String splitStr = "https://34.49.218.153/";
 
             // 기존 GCS URL도 처리 가능하도록 호환성 유지 (혹시나 해서)
             if (fileUrl.startsWith("https://storage.googleapis.com/" + bucketName + "/")) {
                 splitStr = "https://storage.googleapis.com/" + bucketName + "/";
+            } else if (fileUrl.startsWith("http://34.49.218.153/")) {
+                // 기존 http URL도 처리 (호환성)
+                splitStr = "http://34.49.218.153/";
             } else if (!fileUrl.startsWith(splitStr)) {
                 log.warn("지원되지 않는 URL 형식입니다: {}", fileUrl);
                 return;
