@@ -1,5 +1,6 @@
 # 🍔 FoodCom - Scalable Food Community Service
-> **GCP Enterprise-Grade Architecture** | **High Availability** | **Zero-Downtime Deployment**
+
+> **🔴 프로젝트 상태:** 부하 테스트(1000 VUs) 및 성능 검증 완료 후 비용 절감을 위해 GCP 인프라(Cloud SQL, Redis, Storage, Cloud Run)를 종료했습니다. 코드와 아키텍처 설계는 그대로 유지되어 있으며, 언제든 재배포 가능합니다.
 
 **FoodCom**은 대규모 트래픽을 처리할 수 있도록 설계된 음식 커뮤니티 SNS 서비스입니다.
 구글 클라우드(GCP)의 핵심 기술을 활용하여 **서버리스 확장성(Serverless Scalability)**과 **데이터 일관성(Data Consistency)**을 동시에 확보했습니다.
