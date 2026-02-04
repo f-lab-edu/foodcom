@@ -182,3 +182,68 @@ Cloud Run(Serverless)의 무한한 확장성과 RDB(Cloud SQL)의 물리적 한�
 *   **Error Rate:** **0.00%** (Perfect Stability)
 *   **Avg Latency:** **~210ms** (쾌적한 응답 속도)
 *   **Throughput:** **~21.7 req/s** (분당 약 1,150 요청 처리)
+
+---
+
+## 🚀 High-Load Scaling: 1000 VUs 부하 테스트
+
+50명 → 400명까지의 점진적인 부하 테스트를 거쳐, **1000명 동시 접속(VUs)** 환경에서의 시스템 한계를 테스트하고 최적화를 진행했습니다.
+
+### 1. 테스트 진행 과정 및 병목 분석
+
+| VUs | p(95) Latency | 에러율 | 병목 원인 | 조치 |
+| :---: | :---: | :---: | :--- | :--- |
+| 50 | ~500ms | 0% | - | 기준선 측정 |
+| 200 | ~2.3s (Cold) | 0% | Cold Start | min-instances=1 설정 |
+| 400 | ~584ms (Warm) | 0% | Concurrency 한도 | Concurrency 30→50 증가 |
+| 1000 | ~5.4s (초기) | 0% | **Slave DB CPU 90%** | **Slave DB vCPU 1→2 업그레이드** |
+| 1000 | **~897ms** (최종) | **0%** | - | ✅ 안정화 완료 |
+
+### 2. 리소스 스케일링 판단 근거
+
+#### 🔍 Cloud Run Concurrency vs Max Instances
+*   **CPU 사용률 70% 미만 + max-instances 도달** → `max-instances` 또는 `concurrency` 증가 필요
+*   **CPU 사용률 90%+ → 설정 조절 무의미**, 하드웨어 스펙 업그레이드 필요
+
+#### 🔍 DB 병목 판단
+*   **Cloud Run은 여유, DB CPU 포화(90%)** → Pool Size 조절로 해결 불가
+*   **Pool Size는 "버퍼"일 뿐**, 실제 DB 부하를 줄이려면 **캐싱** 또는 **스펙 업그레이드** 필요
+
+#### 🎯 최종 결정
+*   **Slave DB:** 1 vCPU → **2 vCPU** (Read 트래픽 80% 처리, CPU 병목 해소)
+*   **Master DB:** 현재 스펙 유지 (CPU 30%대로 여유 있음)
+
+### 3. 최종 인프라 설정
+
+| 구성 요소 | 최종 설정 | 비고 |
+| :--- | :---: | :--- |
+| **Cloud Run Concurrency** | 70 | 인스턴스당 동시 처리 요청 수 |
+| **Cloud Run Max Instances** | 15 | 최대 1,050 동시 요청 가능 |
+| **Cloud Run Min Instances** | 1 | Cold Start 방지 |
+| **Master DB Pool Size** | 60 | Write 트래픽 처리 |
+| **Slave DB Pool Size** | 60 | Read 트래픽 처리 |
+| **Slave DB vCPU** | **2** | 1000 VUs 대응을 위해 업그레이드 |
+
+### 4. 1000 VUs 최종 테스트 결과
+
+```
+█ THRESHOLDS
+  http_req_duration ✓ 'p(95)<2000' p(95)=897.17ms
+  http_req_failed   ✓ 'rate<0.01' rate=0.00%
+
+█ TOTAL RESULTS
+  checks_succeeded: 94.51% (99,657 / 105,436)
+  
+  ✓ GetPosts duration < 500ms: 87%
+  ✓ Signup duration < 1s: 94%
+  
+  http_req_duration: avg=203ms, med=53ms, max=5.72s, p(95)=897ms
+  http_reqs: 52,718 (435 req/s)
+```
+
+*   **Error Rate:** **0.00%** ✅
+*   **p(95) Latency:** **897ms** (임계값 2s 이내) ✅
+*   **Throughput:** **435 req/s** (분당 26,100 요청 처리) ✅
+*   **GetPosts 성공률:** 87% < 500ms
+*   **Signup 성공률:** 94% < 1s
+
