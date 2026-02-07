@@ -41,8 +41,8 @@ public class StorageService {
         // GCS에 파일 업로드
         storage.create(blobInfo, file.getBytes());
 
-        // CDN URL 반환 (Load Balancer IP 사용)
-        return String.format("http://34.49.218.153/%s", fileName);
+        // CDN URL 반환 (nip.io 도메인 사용 - HTTPS 지원)
+        return String.format("https://34-49-218-153.nip.io/%s", fileName);
     }
 
     public void deleteFile(String fileUrl) {
@@ -51,12 +51,16 @@ public class StorageService {
         }
 
         try {
-            // CDN URL: http://34.49.218.153/post-images/uuid-file.jpg
-            String splitStr = "http://34.49.218.153/";
+            // nip.io CDN URL: https://34-49-218-153.nip.io/post-images/uuid-file.jpg
+            String splitStr = "https://34-49-218-153.nip.io/";
 
-            // 기존 GCS URL도 처리 가능하도록 호환성 유지 (혹시나 해서)
+            // 기존 URL 형식들도 호환 처리
             if (fileUrl.startsWith("https://storage.googleapis.com/" + bucketName + "/")) {
                 splitStr = "https://storage.googleapis.com/" + bucketName + "/";
+            } else if (fileUrl.startsWith("https://34.49.218.153/")) {
+                splitStr = "https://34.49.218.153/";
+            } else if (fileUrl.startsWith("http://34.49.218.153/")) {
+                splitStr = "http://34.49.218.153/";
             } else if (!fileUrl.startsWith(splitStr)) {
                 log.warn("지원되지 않는 URL 형식입니다: {}", fileUrl);
                 return;

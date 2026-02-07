@@ -9,7 +9,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -25,13 +24,13 @@ public class LoginService {
             throw new IllegalStateException("이미 사용 중인 아이디입니다.");
         }
         log.info("CI/CD test");
-        //단방향 해시 함수를 이용하여 비밀번호 암호화
+        // 단방향 해시 함수를 이용하여 비밀번호 암호화
         memberJoinDTO.setPassword(encoder.encode(memberJoinDTO.getPassword()));
 
         Member member = Member.createMember(memberJoinDTO);
         memberRepository.save(member);
 
-        return member.getUuid();
+        return member.getId().toString();
     }
 
 }

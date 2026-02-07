@@ -20,10 +20,10 @@ export const Home = () => {
             if (data.postList.length === 0) {
                 setHasMore(false);
             } else {
-                // 중복 제거: uuid 기준으로 필터링
+                // 중복 제거: id 기준으로 필터링
                 setPosts(prev => {
-                    const existingUuids = new Set(prev.map(p => p.uuid));
-                    const newPosts = data.postList.filter(p => !existingUuids.has(p.uuid));
+                    const existingIds = new Set(prev.map(p => p.id));
+                    const newPosts = data.postList.filter(p => !existingIds.has(p.id));
                     return [...prev, ...newPosts];
                 });
                 setPage(pageNum + 1);
@@ -51,8 +51,8 @@ export const Home = () => {
 
             {posts.map((post) => (
                 <Link
-                    to={`/posts/${post.uuid}`}
-                    key={post.uuid}
+                    to={`/posts/${post.id}`}
+                    key={post.id}
                     className="block bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow duration-300"
                 >
                     {post.thumbnailUrl && (

@@ -13,7 +13,7 @@ export interface PostUpdateRequest {
 }
 
 export interface PostResponse { // For Detail
-    uuid: string;
+    id: number;
     title: string;
     content: string;
     userName: string;
@@ -23,7 +23,7 @@ export interface PostResponse { // For Detail
 }
 
 export interface PostListResponse { // For Home Feed
-    uuid: string;
+    id: number;
     title: string;
     writer: string;
     thumbnailUrl: string | null;
@@ -56,8 +56,8 @@ export const postApi = {
         return response.data;
     },
 
-    getPost: async (uuid: string) => {
-        const response = await api.get<PostResponse>(`/posts/${uuid}`);
+    getPost: async (id: string) => {
+        const response = await api.get<PostResponse>(`/posts/${id}`);
         return response.data;
     },
 
@@ -87,7 +87,7 @@ export const postApi = {
         return response.data;
     },
 
-    updatePost: async (uuid: string, data: PostUpdateRequest) => {
+    updatePost: async (id: string, data: PostUpdateRequest) => {
         const formData = new FormData();
 
         const jsonPart = JSON.stringify({
@@ -103,7 +103,7 @@ export const postApi = {
             });
         }
 
-        const response = await api.patch(`/posts/${uuid}`, formData, {
+        const response = await api.patch(`/posts/${id}`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -111,11 +111,11 @@ export const postApi = {
         return response.data;
     },
 
-    deletePost: async (uuid: string) => {
-        await api.delete(`/posts/${uuid}`);
+    deletePost: async (id: string) => {
+        await api.delete(`/posts/${id}`);
     },
 
-    createComment: async (postUuid: string, content: string) => {
-        await api.post(`/posts/${postUuid}/comments`, { content });
+    createComment: async (postId: string, content: string) => {
+        await api.post(`/posts/${postId}/comments`, { content });
     }
 };

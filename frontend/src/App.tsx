@@ -16,9 +16,9 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/write" element={<CreatePost />} />
-        <Route path="/posts/:postUuid/edit" element={<CreatePost />} />
+        <Route path="/posts/:postId/edit" element={<CreatePost />} />
         <Route path="/mypage" element={<MyPage />} />
-        <Route path="/posts/:postUuid" element={<PostDetail />} />
+        <Route path="/posts/:postId" element={<PostDetail />} />
         {/* Add more routes later */}
       </Route>
     </Routes>

@@ -22,7 +22,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
-import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -62,7 +61,7 @@ public class PostControllerTest {
                                 .username("Test User")
                                 .age(25)
                                 .gender(Gender.MALE)
-                                .uuid(UUID.randomUUID().toString())
+
                                 .build();
                 memberRepository.save(testMember);
         }
@@ -127,10 +126,10 @@ public class PostControllerTest {
                                 .build();
                 // prePersist에서 UUID 생성되므로 save 후 확인
                 postRepository.save(post);
-                String uuid = post.getUuid();
+                Long postId = post.getId();
 
                 // when & then
-                mockMvc.perform(get("/posts/{postUuid}", uuid)
+                mockMvc.perform(get("/posts/{postId}", postId)
                                 .accept(MediaType.APPLICATION_JSON))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.title").value("View Test Title"))
@@ -148,7 +147,7 @@ public class PostControllerTest {
                                 .member(testMember)
                                 .build();
                 postRepository.save(post);
-                String uuid = post.getUuid();
+                Long postId = post.getId();
 
                 String updatedTitle = "Updated Title";
                 String updatedContent = "Updated Content";
@@ -159,7 +158,7 @@ public class PostControllerTest {
                                 "data", "", "application/json", jsonRequest.getBytes(StandardCharsets.UTF_8));
 
                 // when & then
-                mockMvc.perform(multipart("/posts/{postUuid}", uuid)
+                mockMvc.perform(multipart("/posts/{postId}", postId)
                                 .file(dataPart)
                                 .with(request -> {
                                         request.setMethod("PATCH");
@@ -187,12 +186,12 @@ public class PostControllerTest {
                                 .member(testMember)
                                 .build();
                 postRepository.save(post);
-                String uuid = post.getUuid();
+                Long postId = post.getId();
 
                 // Mock StorageService delete (if applicable)
 
                 // when & then
-                mockMvc.perform(delete("/posts/{postUuid}", uuid)
+                mockMvc.perform(delete("/posts/{postId}", postId)
                                 .with(csrf()))
                                 .andExpect(status().isNoContent());
 
@@ -234,14 +233,14 @@ public class PostControllerTest {
                                 .member(testMember) // Author is "testuser"
                                 .build();
                 postRepository.save(post);
-                String uuid = post.getUuid();
+                Long postId = post.getId();
 
                 String jsonRequest = "{\"title\":\"Updated\", \"content\":\"Updated content\"}";
                 MockMultipartFile dataPart = new MockMultipartFile(
                                 "data", "", "application/json", jsonRequest.getBytes(StandardCharsets.UTF_8));
 
                 // when & then
-                mockMvc.perform(multipart("/posts/{postUuid}", uuid)
+                mockMvc.perform(multipart("/posts/{postId}", postId)
                                 .file(dataPart)
                                 .with(request -> {
                                         request.setMethod("PATCH");
@@ -265,7 +264,7 @@ public class PostControllerTest {
                 postRepository.save(post);
 
                 // when & then
-                mockMvc.perform(delete("/posts/{postUuid}", post.getUuid())
+                mockMvc.perform(delete("/posts/{postId}", post.getId())
                                 .with(csrf()))
                                 .andExpect(status().isForbidden());
         }
@@ -275,10 +274,10 @@ public class PostControllerTest {
         @WithMockUser(username = "testuser")
         public void viewPost_NotFound() throws Exception {
                 // given
-                String invalidUuid = UUID.randomUUID().toString();
+                Long invalidId = 999999L;
 
                 // when & then
-                mockMvc.perform(get("/posts/{postUuid}", invalidUuid)
+                mockMvc.perform(get("/posts/{postId}", invalidId)
                                 .accept(MediaType.APPLICATION_JSON))
                                 .andExpect(status().isNotFound());
         }

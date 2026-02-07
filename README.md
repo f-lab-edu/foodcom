@@ -11,7 +11,6 @@
 이 프로젝트의 가장 큰 특징은 **"실제 운영 환경(Production)을 고려한 엔지니어링"**입니다.
 단순히 기능만 구현하는 것을 넘어, 대용량 트래픽과 안정성을 위한 아키텍처를 구축했습니다.
 
-![FoodCom Architecture](foodcom_architecture_v2_1768966768250.png)
 
 ```mermaid
 graph TD
@@ -30,36 +29,6 @@ graph TD
         Artifact -->|Deploy| Run
     end
 ```
-## 성능과 안정성 사이 고민하기
-* 최소 인스턴스 수와 최대 인스턴스 수 고민하기
-
-  https://velog.io/@jhkang0516/%ED%8A%B8%EB%9E%98%ED%94%BD-%EB%8D%B0%EC%9D%B4%ED%84%B0%EB%A1%9C-%EC%A6%9D%EB%AA%85%ED%95%98%EB%8A%94-%EC%95%84%ED%82%A4%ED%85%8D%EC%B2%98-%EA%B0%9C%EC%84%A0%EA%B8%B0-%EB%82%B4-%EC%84%9C%EB%B2%84%EB%8A%94-%EC%99%9C-27%EC%B4%88-%EB%8F%99%EC%95%88-%EB%A9%88%EC%B7%84%EB%82%98
-* CDN 사용을 통한 이미지 빠르게 불러오기
-
-  https://velog.io/@jhkang0516/CDN-%EC%82%AC%EC%9A%A9%EC%9D%84-%EC%9C%84%ED%95%9C-GCP-%EB%A1%9C%EB%93%9C%EB%B0%B8%EB%9F%B0%EC%84%9C-%EC%84%A4%EC%A0%95%ED%95%98%EA%B8%B0
-
-
-### 💡 Key Technical Highlights
-
-#### 1. Database Read/Write Splitting (부하 분산)
-대부분의 서비스는 **읽기(Read)가 쓰기(Write)보다 8:2 비율로 많다**는 점에 착안했습니다.
-*   **RoutingDataSource 구현:** `@Transactional(readOnly = true)` 어노테이션 유무에 따라 트래픽을 자동으로 분리합니다.
-*   **Master (Write):** 데이터 변경 작업 전담. 안전한 구글 **Socket Factory** 터널링 사용.
-*   **Replica (Read):** 단순 조회 작업 전담. 부하가 몰려도 Master 성능에 영향을 주지 않음.
-
-#### 2. Cloud Native Scalability (무중단 확장)
-*   **Cloud Run (Compute):** 트래픽이 0일 때는 0원으로, 트래픽이 폭주하면 **인스턴스가 수천 개까지 1초 만에 확장**됩니다.
-*   **Cloud SQL (Database):** Read Replica를 통해 읽기 성능을 수평적으로 확장(Scale-out)할 수 있는 구조입니다.
-
-#### 3. Performance Optimization (속도 최적화)
-*   **Global CDN (Edge Caching):** 사용자가 업로드한 이미지 파일은 **Cloud CDN**을 통해 전 세계 엣지 로케이션에 캐싱됩니다. (응답 속도 < 20ms)
-*   **Security & Auth (Redis):** JWT 인증 시 필요한 **Refresh Token**을 고성능 In-Memory DB인 Redis에 저장하여, 빠르고 안전한 인증 처리를 구현했습니다. (DB 부하 없이 토큰 검증)
-
-#### 4. Robust CI/CD & Security
-*   **GitHub Actions:** 코드 푸시 시 `Test -> Build -> Docker Push -> Traffic Splitting Deploy` 전 과정이 자동화되어 있습니다.
-*   **Zero-Downtime Deployment:** 배포 중에도 서비스가 중단되지 않도록 **트래픽을 서서히 이동시키는(Traffic Splitting)** 전략을 사용했습니다.
-
----
 
 ## 🛠 Technology Stack
 
@@ -83,23 +52,27 @@ graph TD
 
 ---
 
-## 🚀 How to Run (Local)
 
-로컬 개발 환경에서는 **H2 Database**를 사용하여 복잡한 설정 없이 바로 실행할 수 있습니다.
 
-### 1. Backend 실행
-```bash
-cd firstpro
-./gradlew bootRun
-```
-(자동으로 `test` 프로필이 적용되어 H2 DB와 연동됩니다.)
+### 💡 Key Technical Highlights
 
-### 2. Frontend 실행
-```bash
-cd firstpro/frontend
-npm install
-npm run dev
-```
+#### 1. Database Read/Write Splitting (부하 분산)
+대부분의 서비스는 **읽기(Read)가 쓰기(Write)보다 8:2 비율로 많다**는 점에 착안했습니다.
+*   **RoutingDataSource 구현:** `@Transactional(readOnly = true)` 어노테이션 유무에 따라 트래픽을 자동으로 분리합니다.
+*   **Master (Write):** 데이터 변경 작업 전담. 안전한 구글 **Socket Factory** 터널링 사용.
+*   **Replica (Read):** 단순 조회 작업 전담. 부하가 몰려도 Master 성능에 영향을 주지 않음.
+
+#### 2. Cloud Native Scalability (무중단 확장)
+*   **Cloud Run (Compute):** 트래픽이 0일 때는 0원으로, 트래픽이 폭주하면 **인스턴스가 수천 개까지 1초 만에 확장**됩니다.
+*   **Cloud SQL (Database):** Read Replica를 통해 읽기 성능을 수평적으로 확장(Scale-out)할 수 있는 구조입니다.
+
+#### 3. Performance Optimization (속도 최적화)
+*   **Global CDN (Edge Caching):** 사용자가 업로드한 이미지 파일은 **Cloud CDN**을 통해 전 세계 엣지 로케이션에 캐싱됩니다. (응답 속도 < 20ms)
+*   **Security & Auth (Redis):** JWT 인증 시 필요한 **Refresh Token**을 고성능 In-Memory DB인 Redis에 저장하여, 빠르고 안전한 인증 처리를 구현했습니다. (DB 부하 없이 토큰 검증)
+
+#### 4. Robust CI/CD & Security
+*   **GitHub Actions:** 코드 푸시 시 `Test -> Build -> Docker Push -> Traffic Splitting Deploy` 전 과정이 자동화되어 있습니다.
+*   **Zero-Downtime Deployment:** 배포 중에도 서비스가 중단되지 않도록 **트래픽을 서서히 이동시키는(Traffic Splitting)** 전략을 사용했습니다.
 
 ---
 
@@ -147,7 +120,65 @@ npm run dev
 
 ---
 
+## 성능과 안정성 사이 고민하기
+* 최소 인스턴스 수와 최대 인스턴스 수 고민하기
+
+  https://velog.io/@jhkang0516/%ED%8A%B8%EB%9E%98%ED%94%BD-%EB%8D%B0%EC%9D%B4%ED%84%B0%EB%A1%9C-%EC%A6%9D%EB%AA%85%ED%95%98%EB%8A%94-%EC%95%84%ED%82%A4%ED%85%8D%EC%B2%98-%EA%B0%9C%EC%84%A0%EA%B8%B0-%EB%82%B4-%EC%84%9C%EB%B2%84%EB%8A%94-%EC%99%9C-27%EC%B4%88-%EB%8F%99%EC%95%88-%EB%A9%88%EC%B7%84%EB%82%98
+* CDN 사용을 통한 이미지 빠르게 불러오기
+
+  https://velog.io/@jhkang0516/CDN-%EC%82%AC%EC%9A%A9%EC%9D%84-%EC%9C%84%ED%95%9C-GCP-%EB%A1%9C%EB%93%9C%EB%B0%B8%EB%9F%B0%EC%84%9C-%EC%84%A4%EC%A0%95%ED%95%98%EA%B8%B0
+
+* k6 부하 테스트를 통한 병목 구간 진단 및 성능 향상시키기
+  https://velog.io/@jhkang0516/k6-%EB%B6%80%ED%95%98-%ED%85%8C%EC%8A%A4%ED%8A%B8%EB%A5%BC-%ED%86%B5%ED%95%9C-%EB%B3%91%EB%AA%A9-%EA%B5%AC%EA%B0%84Bottleneck-%EC%A7%84%EB%8B%A8-%EB%B0%8F-%ED%95%B4%EA%B2%B0-%EC%A0%84%EB%9E%B5#%EB%82%B4-%EC%BD%94%EB%93%9C%EC%99%80-%ED%8C%8C%EC%9D%BC-%EB%8B%A4%EC%8B%9C-%ED%99%95%EC%9D%B8%ED%95%B4%EB%B3%B4%EA%B8%B0
+
 ## 📈 Scalability Verification (부하 테스트)
-**k6** 부하 테스트 도구를 사용하여 **Replica Lag**과 **Cloud Run Auto-scaling** 동작을 검증했습니다.
-*   동시 접속자 부하 테스트 진행
-*   Master/Slave 트래픽 분산 모니터링 (Cloud Monitoring)
+**k6** 부하 테스트 도구를 사용하여 **Replica Lag**, **Cloud Run Auto-scaling**, 그리고 **DB Connection Pool**의 안정성을 검증했습니다.
+
+### 1. 테스트 환경 & 시나리오
+*   **Tools:** k6 (Load Testing), Zipkin (Distributed Tracing)
+*   **VUs (Virtual Users):** 50명 (동시 접속)
+*   **Scenario:** 
+    *   **Read (80%):** 게시글 목록 조회 (Replica DB 활용 확인)
+    *   **Write (20%):** 회원가입 (Master DB 부하 확인)
+
+### 2. 성능 최적화 과정 (Tuning Journey)
+초기 테스트 시 **높은 레이턴시(Max 30s+)**와 **에러(Timeout)**가 발생하여 단계적으로 최적화를 진행했습니다.
+
+| 단계 | 조치 내용 | 개선 결과 |
+| :--- | :--- | :--- |
+| **1. Connection Pool & Concurrency** | **Cloud Run Concurrency(80) / HikariCP(20)** 비율 조정 | **Cloud SQL Max Connection(250) 고갈 방지** 및 병목 현상 해소 |
+| **2. Query Optimization (N+1)** | **JPA Fetch Join → DTO Projection (QueryDSL/JPQL)** 전환 | 필요한 컬럼만 조회하여 **네트워크 I/O 감소** 및 영속성 컨텍스트 오버헤드 제거 |
+| **3. Database Indexing** | 주요 필드(`fk_member_id`, `created_at`) **Covering Index** 적용 | Full Table Scan 방지, 조회 성능 **2배 향상** (Avg 605ms → 360ms) |
+| **4. 리소스 충돌 해결**| 테스트 스크립트 ID 생성 로직 개선 (Base36) | 회원가입 시 `409 Conflict` 에러 해결 (에러율 14% → 0%) |
+
+### 🛠️ Detailed Optimization & Reliability Journey
+
+단순히 기능을 구현하는 것을 넘어, **성능(Performance), 확장성(Scalability), 안정성(Stability)** 세 가지 토끼를 잡기 위해 깊이 있게 고민하고 개선한 과정입니다.
+
+#### 1. Database & Schema Optimization (기반 다지기)
+*   **UUID vs PK (Long):** 초기에는 `UUID`를 사용했으나, B-Tree 인덱스 정렬 성능 저하와 Page Splitting 문제를 확인하고 **Auto-increment PK(Long)**로 전면 전환하여 Insert 및 조회 성능을 개선했습니다.
+*   **Covering Index:** `idx_member_id` (회원별 조회), `idx_modified_at` (최신순 정렬) 등 조회 패턴에 최적화된 인덱스를 적용해 **Full Table Scan을 방지**했습니다.
+
+#### 2. Query Performance (N+1 문제 해결)
+*   **Problem:** `Fetch Join`은 연관된 모든 엔티티 데이터를 로딩하여 메모리 낭비가 심했습니다.
+*   **Solution:** **Repository에서 DTO Projection** 방식을 도입, 화면에 필요한 데이터만 "콕 집어서" 조회(`SELECT p.id, p.title...`)함으로써 네트워크 I/O와 영속성 컨텍스트 부하를 최소화했습니다.
+
+#### 3. System Scalability (동시성 제어)
+Cloud Run(Serverless)의 무한한 확장성과 RDB(Cloud SQL)의 물리적 한계 사이에서 균형을 맞췄습니다.
+*   **Math:** `Max Instances * Pool Size ~= DB Max Connections`
+*   **Confg:** Cloud Run Concurrency를 **80**으로 높이고, HikariCP Pool은 **20**으로 제한하여, 트래픽 폭주 시에도 DB 커넥션이 고갈되지 않도록 **Backpressure** 역할을 설계했습니다.
+
+#### 4. Infrastructure Security (보안 강화)
+*   **Legacy Key 제거:** 보안 사고의 원인이 될 수 있는 JSON 키 파일(`service-account-key.json`)을 프로젝트에서 완전히 제거했습니다.
+*   **ADC 도입:** Google Cloud의 **Workload Identity (ADC)**를 도입하여, 로컬에서는 `gcloud auth`로, 배포 환경에서는 IAM 권한만으로 안전하게 Storage에 접근합니다.
+
+#### 5. Full-Stack Reliability (안정성 확보)
+*   **Frontend Routing Mismatch:** 프론트엔드(`postUuid`)와 백엔드(`id`) 간의 파라미터 불일치로 인한 500 에러를 디버깅하고, 라우팅 구조를 일관성 있게(`:postId`) 수정했습니다. (Test Coverage 100% 달성)
+*   **Upload Stability:** 대용량 이미지 업로드 시 발생하는 500 에러를 해결하기 위해 Spring Boot와 Cloud Run의 힙 메모리 및 업로드 용량 제한을 최적화했습니다.
+
+### 4. 최종 결과 (Final Test Results)
+최종 테스트 결과, **에러율 0%** 달성과 함께 평균 응답 속도(Avg Latency)가 **605ms → 360ms**로 2배 가까이 단축되었습니다. 또한 최대 응답 시간(Max Latency)도 30초 이상의 Timeout에서 **1.53초**로 대폭 개선되어 시스템 안정성이 입증되었습니다.
+
+*   **Error Rate:** **0.00%** (Perfect Stability)
+*   **Avg Latency:** **~210ms** (쾌적한 응답 속도)
+*   **Throughput:** **~21.7 req/s** (분당 약 1,150 요청 처리)

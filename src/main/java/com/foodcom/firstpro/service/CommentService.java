@@ -18,23 +18,24 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class CommentService {
 
-    private final PostRepository postRepository;
-    private final MemberRepository memberRepository;
-    private final CommentRepository commentRepository;
+        private final PostRepository postRepository;
+        private final MemberRepository memberRepository;
+        private final CommentRepository commentRepository;
 
-    public void createComment(String postUuid, CommentCreateDto commentCreateDto, String loginId) {
-        Post post = postRepository.findByUuid(postUuid)
-                .orElseThrow(() -> new ResourceNotFoundException("게시물을 찾을 수 없습니다."));
+        public void createComment(Long postId, CommentCreateDto commentCreateDto, String loginId) {
+                Post post = postRepository.findById(postId)
+                                .orElseThrow(() -> new ResourceNotFoundException("게시물을 찾을 수 없습니다."));
 
-        Member member = memberRepository.findByLoginId(loginId)
-                .orElseThrow(() -> new LoginFailureException("회원 정보를 찾을 수 없습니다."));
+                Member member = memberRepository.findByLoginId(loginId)
+                                .orElseThrow(() -> new LoginFailureException("회원 정보를 찾을 수 없습니다."));
 
-        Comment comment = Comment.builder()
-                .content(commentCreateDto.getContent())
-                .post(post)
-                .member(member)
-                .build();
+                Comment comment = Comment.builder()
+                                .content(commentCreateDto.getContent())
+                                .post(post)
+                                .member(member)
+                                .build();
 
-        commentRepository.save(comment);
-    }
+                commentRepository.save(comment);
+                postRepository.increaseCommentCount(post.getId());
+        }
 }

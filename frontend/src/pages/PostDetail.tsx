@@ -8,7 +8,7 @@ import { Modal } from '../components/ui/Modal';
 import { Button } from '../components/ui/Button';
 
 export const PostDetail = () => {
-    const { postUuid } = useParams<{ postUuid: string }>();
+    const { postId } = useParams<{ postId: string }>();
     const navigate = useNavigate();
     const { user } = useAuthStore();
     const [post, setPost] = useState<PostResponse | null>(null);
@@ -39,9 +39,9 @@ export const PostDetail = () => {
     };
 
     const loadPost = async () => {
-        if (!postUuid) return;
+        if (!postId) return;
         try {
-            const data = await postApi.getPost(postUuid);
+            const data = await postApi.getPost(postId);
             setPost(data);
         } catch (err: any) {
             console.error(err);
@@ -53,15 +53,15 @@ export const PostDetail = () => {
 
     useEffect(() => {
         loadPost();
-    }, [postUuid]);
+    }, [postId]);
 
     const handleCommentSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!postUuid || !newComment.trim()) return;
+        if (!postId || !newComment.trim()) return;
 
         setSubmittingComment(true);
         try {
-            await postApi.createComment(postUuid, newComment);
+            await postApi.createComment(postId, newComment);
             setNewComment('');
             // Reload post to see new comment
             await loadPost();
@@ -77,11 +77,11 @@ export const PostDetail = () => {
     };
 
     const handleDeleteConfirm = async () => {
-        if (!postUuid) return;
+        if (!postId) return;
 
         setIsDeleting(true);
         try {
-            await postApi.deletePost(postUuid);
+            await postApi.deletePost(postId);
             setIsDeleteModalOpen(false);
             navigate('/');
         } catch (err: any) {
@@ -182,7 +182,7 @@ export const PostDetail = () => {
                         {user?.username === post.userName && (
                             <div className="flex gap-2">
                                 <button
-                                    onClick={() => navigate(`/posts/${postUuid}/edit`)}
+                                    onClick={() => navigate(`/posts/${postId}/edit`)}
                                     className="p-2 text-slate-400 hover:text-blue-500 transition-colors"
                                     title="게시글 수정"
                                 >

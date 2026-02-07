@@ -4,18 +4,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.foodcom.firstpro.domain.member.Member;
 import com.foodcom.firstpro.domain.member.MemberUpdateDto;
 import com.foodcom.firstpro.repository.MemberRepository;
+import com.google.cloud.storage.Storage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import com.foodcom.firstpro.domain.member.Gender;
-import java.util.UUID;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -27,6 +28,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Transactional
 public class UserControllerTest {
+
+    @MockitoBean
+    private Storage storage;
 
     @Autowired
     private MockMvc mockMvc;
@@ -47,7 +51,7 @@ public class UserControllerTest {
                 .username("Test User")
                 .age(25)
                 .gender(Gender.MALE)
-                .uuid(UUID.randomUUID().toString())
+
                 .build();
         memberRepository.save(testMember);
     }

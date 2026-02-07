@@ -126,8 +126,8 @@ export const MyPage = () => {
                     ) : (
                         profile.posts.map((post) => (
                             <Link
-                                to={`/posts/${post.uuid}`}
-                                key={post.uuid}
+                                to={`/posts/${post.id}`}
+                                key={post.id}
                                 className="block bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:border-blue-200 transition-colors"
                             >
                                 <div className="flex justify-between items-start mb-2">
