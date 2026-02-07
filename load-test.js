@@ -4,9 +4,9 @@ import { randomString } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js';
 
 export let options = {
     stages: [
-        { duration: '30s', target: 20 }, // 30초 동안 20명까지 램프업
-        { duration: '1m', target: 50 },  // 1분 동안 50명 유지 (부하 구간)
-        { duration: '30s', target: 0 },  // 30초 동안 종료
+        { duration: '30s', target: 400 },  // 30초 동안 400명까지 램프업
+        { duration: '1m', target: 1000 },  // 1분 동안 1000명 유지 (부하 구간)
+        { duration: '30s', target: 0 },    // 30초 동안 종료
     ],
     thresholds: {
         http_req_duration: ['p(95)<2000'], // 95% 요청이 2초 이내
